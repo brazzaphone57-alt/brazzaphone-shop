@@ -15,9 +15,12 @@ function normalizeProducts(value) {
 }
 
 exports.handler = async (event) => {
-  const store = getStore("products");
+  const store = getStore({
+    name: "products",
+    siteID: process.env.NETLIFY_SITE_ID,
+    token: process.env.NETLIFY_AUTH_TOKEN
+  });
 
-  // OPTIONS
   if (event.httpMethod === "OPTIONS") {
     return {
       statusCode: 204,
@@ -31,7 +34,6 @@ exports.handler = async (event) => {
   }
 
   try {
-    // POST: write
     if (event.httpMethod === "POST") {
       const body = event.body ? JSON.parse(event.body) : null;
       const products = normalizeProducts(body);
@@ -48,7 +50,6 @@ exports.handler = async (event) => {
       };
     }
 
-    // GET: read
     if (event.httpMethod === "GET") {
       const raw = await store.get(PRODUCTS_KEY);
       const products = raw ? normalizeProducts(JSON.parse(raw)) : [];
@@ -63,7 +64,6 @@ exports.handler = async (event) => {
       };
     }
 
-    // Else
     return {
       statusCode: 405,
       headers: {
@@ -84,4 +84,3 @@ exports.handler = async (event) => {
     };
   }
 };
-
