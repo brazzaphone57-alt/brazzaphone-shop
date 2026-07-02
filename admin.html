@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin – Brazzaphone</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="admin.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+
+
+  <!-- LOGIN -->
+  <div class="login-screen" id="loginScreen">
+    <div class="login-card">
+      <div class="login-logo">
+        <img class="logo-img" src="logo-brazzaphone.png.jpeg" alt="Brazzaphone" style="height: 60px; width: auto;" />
+      </div>
+
+      <h2>Espace Admin</h2>
+      <p>Connectez-vous pour gérer vos produits</p>
+      <div class="form-group">
+        <label for="loginUser">Nom d'utilisateur</label>
+        <input type="text" id="loginUser" placeholder="admin" />
+      </div>
+
+      <div class="form-group">
+        <label for="loginPass">Mot de passe</label>
+          <div class="pass-row">
+            <input type="password" id="loginPass" placeholder="••••••••" aria-label="Mot de passe" />
+
+          <button type="button" class="toggle-pass" onclick="togglePassword()">👁️</button>
+        </div>
+      </div>
+      <button onclick="doLogin()">Se connecter</button>
+      <p class="login-error" id="loginError"></p>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div class="dashboard" id="dashboard" style="display:none;">
+
+    <!-- Mobile burger + overlay -->
+    <button class="admin-burger" type="button" aria-label="Ouvrir le menu" onclick="toggleAdminMenu()">☰</button>
+    <div class="sidebar-overlay" id="sidebarOverlay" aria-hidden="true" onclick="toggleAdminMenu()"></div>
+
+
+    <!-- Sidebar (desktop + mobile tiroir) -->
+    <aside class="sidebar" id="adminSidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">
+          <img class="sidebar-logo-img" src="logo-brazzaphone.png.jpeg" alt="Brazzaphone" />
+          <span class="sidebar-logo-text">📱 Brazza<span>phone</span></span>
+        </div>
+        <button class="sidebar-close" onclick="toggleAdminMenu()" aria-label="Fermer">✕</button>
+      </div>
+      <nav class="sidebar-nav">
+        <button class="sidebar-btn active" onclick="showSection('products')">
+          <span class="sidebar-icon">📦</span>
+          <span class="sidebar-text">Produits</span>
+          <span class="sidebar-badge" id="productsBadge" style="display:none;"></span>
+        </button>
+        <button class="sidebar-btn" onclick="showSection('orders')">
+          <span class="sidebar-icon">🛒</span>
+          <span class="sidebar-text">Commandes</span>
+          <span class="sidebar-badge" id="ordersBadge" style="display:none;"></span>
+        </button>
+        <button class="sidebar-btn" onclick="showSection('stats')">
+          <span class="sidebar-icon">📊</span>
+          <span class="sidebar-text">Statistiques</span>
+        </button>
+      </nav>
+
+      <!-- Stats rapides -->
+      <div class="sidebar-stats" id="sidebarStats">
+        <div class="stat-item">
+          <span>📦 Produits</span>
+          <strong id="sidebarProductCount">0</strong>
+        </div>
+        <div class="stat-item">
+          <span>⏳ En attente</span>
+          <strong id="sidebarPendingCount" style="color: #ff9800;">0</strong>
+        </div>
+        <div class="stat-item">
+          <span>💵 Revenus</span>
+          <strong id="sidebarRevenue">0 FCFA</strong>
+        </div>
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="admin-profile">
+          <div class="admin-avatar">👤</div>
+          <div class="admin-info">
+            <div class="admin-name">Admin</div>
+            <div class="admin-status">En ligne</div>
+          </div>
+        </div>
+        <button class="logout-btn" onclick="doLogout()">
+          <span>🚪</span>
+          <span>Déconnexion</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Top Header -->
+    <header class="admin-header">
+      <div class="header-left">
+        <h1 class="section-title" id="sectionTitle">📦 Gestion des Produits</h1>
+      </div>
+      <div class="header-right">
+        <div class="header-info">
+          <span class="info-label">Session:</span>
+          <span class="info-time" id="sessionTime">00:00</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main -->
+    <main class="admin-main">
+
+      <!-- ===== PRODUITS ===== -->
+      <section class="section" id="section-products">
+        <div class="section-header">
+          <div class="section-info">
+            <h2>Gestion des Produits</h2>
+            <p class="section-subtitle">Créez, modifiez ou supprimez vos produits</p>
+          </div>
+          <div class="section-actions">
+            <button class="btn-primary" onclick="openProductModal()">➕ Ajouter un produit</button>
+            <button class="btn-secondary" onclick="exportProductsJSON()">📥 Exporter JSON</button>
+          </div>
+        </div>
+
+        <!-- Aperçu rapide -->
+        <div class="quick-stats" id="miniStats"></div>
+
+        <!-- Contrôles -->
+        <div class="section-controls">
+          <div class="control-group search">
+            <input type="text" id="adminSearch" placeholder="🔍 Rechercher par nom…" oninput="renderAdminProducts()" />
+          </div>
+          <div class="control-group filter">
+            <select id="adminCatFilter" onchange="renderAdminProducts()" class="filter-select">
+              <option value="all">📋 Toutes catégories</option>
+              <option value="neuf">📱 Neufs</option>
+              <option value="reconditionne">♻️ Reconditionnés</option>
+              <option value="accessoire">🎧 Accessoires</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Tableau -->
+        <div class="table-wrap">
+          <table class="products-table">
+            <thead>
+              <tr>
+                <th>Image</th>
+                <th>Nom</th>
+                <th>Catégorie</th>
+                <th>Prix</th>
+                <th>Ancien prix</th>
+                <th>Badge</th>
+                <th>Stock</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="productsTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ===== COMMANDES ===== -->
+      <section class="section" id="section-orders" style="display:none;">
+        <div class="section-header">
+          <div class="section-info">
+            <h2>Gestion des Commandes</h2>
+            <p class="section-subtitle">Suivez et gérez les commandes de vos clients</p>
+          </div>
+        </div>
+
+        <!-- Statistiques rapides commandes -->
+        <div class="orders-summary" id="ordersSummary"></div>
+
+        <!-- Filtres -->
+        <div class="section-controls">
+          <div class="control-group search">
+            <input 
+              type="text" 
+              id="ordersSearch" 
+              placeholder="🔍 Rechercher par nom, téléphone ou adresse…" 
+            />
+          </div>
+          <div class="control-group filter">
+            <select id="ordersFilter" class="filter-select">
+              <option value="all">📋 Tous les statuts</option>
+              <option value="pending">⏳ En attente</option>
+              <option value="confirmed">✔️ Confirmée</option>
+              <option value="delivered">✅ Livrée</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Tableau -->
+        <div class="table-wrap">
+          <table class="products-table" role="table" aria-label="Liste des commandes">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Client</th>
+                <th>Téléphone</th>
+                <th>Adresse</th>
+                <th>Articles</th>
+                <th>Total</th>
+                <th>Statut</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="ordersTableBody"></tbody>
+          </table>
+          <div id="ordersEmpty" style="display:none;text-align:center;padding:28px;color:#aaa;">Aucune commande.</div>
+        </div>
+      </section>
+
+      <!-- ===== STATS ===== -->
+      <section class="section" id="section-stats" style="display:none;">
+        <div class="section-header">
+          <div class="section-info">
+            <h2>Statistiques Catalogue</h2>
+            <p class="section-subtitle">Vue d'ensemble de votre boutique et vos commandes</p>
+          </div>
+        </div>
+        <div class="stats-grid" id="statsGrid"></div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ===== MODAL PRODUIT ===== -->
+  <div class="modal-overlay" id="productModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="modalTitle">Ajouter un produit</h3>
+        <button onclick="closeProductModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="editId" />
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nom du produit *</label>
+            <input type="text" id="pName" placeholder="Ex: Samsung Galaxy A55" aria-label="Nom du produit" />
+          </div>
+          <div class="form-group">
+            <label for="pCategory">Catégorie *</label>
+            <select id="pCategory" aria-label="Catégorie">
+
+
+              <option value="neuf">📱 Neuf</option>
+              <option value="reconditionne">♻️ Reconditionné</option>
+              <option value="accessoire">🎧 Accessoire</option>
+            </select>
+          </div>
+        </div>
+          <div class="form-row">
+          <div class="form-group">
+            <label for="pPrice">Prix (FCFA) *</label>
+            <input type="number" id="pPrice" placeholder="150000" aria-label="Prix (FCFA)" />
+          </div>
+          <div class="form-group">
+            <label for="pOldPrice">Ancien prix (FCFA)</label>
+            <input type="number" id="pOldPrice" placeholder="Optionnel" aria-label="Ancien prix (FCFA)" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="pBadge">Badge</label>
+            <select id="pBadge" aria-label="Badge">
+              <option value="">Aucun</option>
+              <option value="🔥 Promo">🔥 Promo</option>
+              <option value="⭐ Nouveau">⭐ Nouveau</option>
+              <option value="♻️ Recond.">♻️ Recond.</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="pStock">Stock *</label>
+            <input type="number" id="pStock" placeholder="Quantité en stock" min="0" aria-label="Stock" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Image produit</label>
+            <input type="file" id="pImageFile" accept="image/*" aria-label="Image produit" />
+            <input type="hidden" id="pImage" />
+            <div id="pImagePreviewWrap" class="image-preview-wrap" style="display:none;">
+              <div class="image-preview-title">Aperçu</div>
+              <img id="pImagePreview" class="image-preview" alt="Aperçu image" />
+              <button type="button" class="btn-secondary image-remove" onclick="clearImagePreview()">Retirer</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="pDescription">Description produit</label>
+          <textarea id="pDescription" placeholder="Describe le produit en quelques lignes…" rows="3" aria-label="Description"></textarea>
+        </div>
+
+        <!-- SPÉCIFICATIONS (pairs clé-valeur) -->
+        <div class="form-group">
+          <label>📋 Spécifications</label>
+          <div id="specsContainer" class="specs-container"></div>
+          <button type="button" class="btn-secondary btn-small" onclick="addSpecRow()">+ Ajouter une spec</button>
+        </div>
+
+        <!-- AVIS CLIENTS (pairs author-rating-text) -->
+        <div class="form-group">
+          <label>⭐ Avis Clients</label>
+          <div id="reviewsContainer" class="reviews-container"></div>
+          <button type="button" class="btn-secondary btn-small" onclick="addReviewRow()">+ Ajouter un avis</button>
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn-secondary" onclick="closeProductModal()">Annuler</button>
+          <button class="btn-primary" onclick="saveProduct()">💾 Enregistrer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div class="toast" id="adminToast"></div>
+
+  <script src="admin_orders_utils.js"></script>
+  <script src="admin_orders.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>
+

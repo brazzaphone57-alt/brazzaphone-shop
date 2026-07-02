@@ -1,0 +1,246 @@
+ <!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Brazzaphone – Téléphones & Accessoires à Brazzaville</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+
+
+  <!-- ========== HEADER ========== -->
+  <header class="header">
+    <!-- TOP BAR -->
+    <div class="header-top">
+      <div class="container header-top-inner">
+        <div class="header-top-left">
+          <span class="top-item">🌍 Congo-Brazzaville</span>
+          <span class="top-item">📞 Support: +242 05 123 456</span>
+        </div>
+        <div class="header-top-right">
+          <button class="top-action" title="Aide">❓ Aide</button>
+          <button class="top-action" title="Compte">👤 Mon compte</button>
+          <button class="top-action" title="Commandes">📋 Commandes</button>
+          <button class="top-action" title="Favoris">❤️ Favoris</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN HEADER -->
+    <div class="header-main">
+      <div class="container header-main-inner">
+        <div class="logo" role="banner">
+          <img class="logo-img" src="logo-brazzaphone.png.jpeg" alt="Brazzaphone" />
+        </div>
+        <div class="search-bar">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="searchInput" placeholder="Rechercher un téléphone, accessoire…" />
+          <button onclick="filterProducts()" class="search-btn">Rechercher</button>
+        </div>
+        <div class="header-actions">
+          <button class="action-btn" title="Langage">🌐</button>
+          <button class="cart-btn" onclick="toggleCart()">
+            🛒 <span class="cart-badge" id="cartCount">0</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- NAVIGATION -->
+    <nav class="nav">
+      <div class="container">
+        <button class="mobile-nav-toggle" type="button" onclick="toggleMobileNav()" aria-label="Afficher les catégories" aria-expanded="false">
+          ☰ Catégories
+        </button>
+        <div class="nav-inner" id="navInner">
+          <button class="nav-btn active" onclick="filterCategory('all')">🏠 Tout</button>
+          <button class="nav-btn" onclick="filterCategory('neuf')">📱 Neufs</button>
+          <button class="nav-btn" onclick="filterCategory('reconditionne')">♻️ Reconditionnés</button>
+          <button class="nav-btn" onclick="filterCategory('accessoire')">🎧 Accessoires</button>
+          <button class="nav-btn" onclick="filterCategory('promo')">🔥 Promos</button>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <!-- ========== HERO BANNER ========== -->
+  <section class="hero">
+    <div class="container hero-inner">
+      <div class="hero-text">
+        <p class="hero-eyebrow">🔥 Offres exclusives à Brazzaville</p>
+        <h1>Téléphones & Accessoires<br /><span class="hero-accent">au meilleur prix</span></h1>
+        <p class="hero-sub">Paiement Airtel Money · MTN Money · Livraison cash</p>
+        <button class="hero-cta" onclick="filterCategory('all')">Voir les produits</button>
+      </div>
+      <div class="hero-badges">
+        <div class="badge-card">✅ Produits garantis</div>
+        <div class="badge-card">🚚 Livraison rapide</div>
+        <div class="badge-card">💬 WhatsApp 24/7</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== PRODUITS ========== -->
+  <main class="main">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">Nos Produits</h2>
+        <span class="product-count" id="productCount"></span>
+      </div>
+
+      <!-- FILTRES AVANCÉS -->
+      <div class="filters-section">
+        <div class="filters-row">
+          <!-- Filtre Prix -->
+          <div class="filter-group">
+            <label>💰 Prix</label>
+            <div class="price-filter">
+              <input type="number" id="priceMin" placeholder="Min" class="price-input" onchange="applyFilters()" />
+              <span>-</span>
+              <input type="number" id="priceMax" placeholder="Max" class="price-input" onchange="applyFilters()" />
+            </div>
+          </div>
+
+          <!-- Filtre Tri -->
+          <div class="filter-group">
+            <label>📊 Tri</label>
+            <select id="sortBy" class="filter-select" onchange="applyFilters()">
+              <option value="recent">Plus récent</option>
+              <option value="price-low">Prix ↑ (bas)</option>
+              <option value="price-high">Prix ↓ (haut)</option>
+              <option value="rating">⭐ Meilleur avis</option>
+              <option value="popular">🔥 Populaire</option>
+            </select>
+          </div>
+
+          <!-- Bouton Réinitialiser -->
+          <div class="filter-group">
+            <button class="reset-filters" onclick="resetFilters()">🔄 Réinitialiser</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="product-grid" id="productGrid">
+        <!-- Injecté par JS -->
+      </div>
+      <div class="empty-state" id="emptyState" style="display:none;">
+        <p>😕 Aucun produit trouvé.</p>
+      </div>
+    </div>
+  </main>
+
+  <!-- ========== PANIER SIDEBAR ========== -->
+  <div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
+  <aside class="cart-sidebar" id="cartSidebar">
+    <div class="cart-header">
+      <h3>🛒 Mon Panier</h3>
+      <button onclick="toggleCart()">✕</button>
+    </div>
+    <div class="cart-items" id="cartItems"></div>
+    <div class="cart-footer" id="cartFooter" style="display:none;">
+      <div class="cart-total">
+        <span>Total :</span>
+        <strong id="cartTotal">0 FCFA</strong>
+      </div>
+      <button class="checkout-btn" onclick="showCheckout()">Commander maintenant</button>
+    </div>
+    <div class="cart-empty" id="cartEmpty">
+      <p>Votre panier est vide.</p>
+      <small>Ajoutez des produits pour commencer.</small>
+    </div>
+  </aside>
+
+  <!-- ========== MODAL COMMANDE ========== -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>📦 Finaliser la commande</h3>
+        <button onclick="closeModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Nom complet *</label>
+          <input type="text" id="orderName" placeholder="Votre nom" />
+        </div>
+        <div class="form-group">
+          <label>Téléphone *</label>
+          <input type="tel" id="orderPhone" placeholder="+242 XX XXX XXXX" />
+        </div>
+        <div class="form-group">
+          <label>Quartier / Adresse de livraison *</label>
+          <input type="text" id="orderAddress" placeholder="Ex: Poto-Poto, Moungali…" />
+        </div>
+        <div class="form-group">
+          <label>Mode de paiement *</label>
+          <div class="payment-options">
+            <label class="payment-opt">
+              <input type="radio" name="payment" value="airtel" /> Airtel Money
+            </label>
+            <label class="payment-opt">
+              <input type="radio" name="payment" value="mtn" /> MTN Money
+            </label>
+            <label class="payment-opt">
+              <input type="radio" name="payment" value="cash" /> Livraison Cash
+            </label>
+          </div>
+        </div>
+        <div class="order-summary" id="orderSummary"></div>
+        <button class="submit-order-btn" onclick="submitOrder()">✅ Confirmer la commande</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== TOAST ========== -->
+  <div class="toast" id="toast"></div>
+
+  <!-- ========== FOOTER ========== -->
+  <footer class="footer">
+    <div class="footer-top">
+      <div class="container">
+        <div class="footer-banner">
+          <div class="footer-banner-item">
+            <span class="footer-banner-icon">📍</span>
+            <div>
+              <strong>Livraison</strong>
+              <p>Brazzaville · Centre-ville</p>
+            </div>
+          </div>
+          <div class="footer-banner-item">
+            <span class="footer-banner-icon">💬</span>
+            <div>
+              <strong>WhatsApp 24/7</strong>
+              <p><a href="https://wa.me/242056145113" rel="noopener">+242 056 145 113</a></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="container footer-inner">
+      <div>
+        <p class="footer-logo">📱 Brazza<span>phone</span></p>
+        <p>Votre boutique téléphonique à Brazzaville</p>
+      </div>
+      <div>
+        <p><strong>À propos</strong></p>
+        <p>Téléphones neufs et reconditionnés</p>
+        <p>Accessoires de qualité</p>
+      </div>
+      <div>
+        <p><strong>Paiement accepté</strong></p>
+        <p>📲 Airtel Money</p>
+        <p>📲 MTN Money</p>
+        <p>💵 Livraison Cash</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2025 Brazzaphone · Tous droits réservés</p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

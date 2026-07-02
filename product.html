@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Détail produit · BrazzaPhone</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="product.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+
+
+  <!-- ========== HEADER (reuse du style global) ========== -->
+  <header class="header">
+    <div class="header-top">
+      <div class="container header-top-inner">
+        <span>📍 Livraison à Brazzaville · Centre-ville</span>
+        <span>
+          WhatsApp: <a href="https://wa.me/242056145113" target="_blank" rel="noopener">+242 056 145 113</a>
+
+        </span>
+      </div>
+    </div>
+
+    <div class="header-main">
+      <div class="container header-main-inner">
+        <div class="logo" onclick="location.href='index.html'" style="cursor:pointer;">
+          <img class="logo-img" src="logo-brazzaphone.png.jpeg" alt="Brazzaphone" />
+        </div>
+
+        <div class="header-actions">
+          <button class="cart-btn" onclick="toggleCart()">
+            🛒 <span class="cart-badge" id="cartCount">0</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- petite nav simplifiée -->
+    <nav class="nav">
+      <div class="container nav-inner">
+        <button class="nav-btn" onclick="location.href='index.html'">← Retour</button>
+        <button class="nav-btn" onclick="toggleCart()">Voir panier</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="product-page">
+    <div class="container">
+      <div class="breadcrumbs" id="breadcrumbs"></div>
+
+      <div class="product-hero" aria-live="polite">
+        <!-- Galerie -->
+        <section class="gallery">
+          <div class="gallery-main" id="galleryMain">
+            <!-- injecté -->
+          </div>
+          <div class="gallery-thumbs" id="galleryThumbs">
+            <!-- injecté -->
+          </div>
+        </section>
+
+        <!-- Infos produit -->
+        <section class="product-summary">
+          <div class="product-badges-row" id="badgeRow"></div>
+
+          <h1 class="product-title" id="productName">—</h1>
+
+          <div class="price-row">
+            <span class="product-price" id="productPrice">—</span>
+            <span class="product-old-price" id="productOldPrice" style="display:none;">—</span>
+          </div>
+
+          <p class="product-description" id="productDescription">
+            <!-- injecté -->
+          </p>
+
+          <div class="delivery-box">
+            <div class="delivery-title">🚚 Livraison à Brazzaville – Centre-ville</div>
+            <ul class="delivery-list">
+              <li>Livraison en main propre</li>
+              <li>Suivi & confirmation par WhatsApp</li>
+              <li>Paiement Airtel Money / MTN Money / Livraison Cash</li>
+            </ul>
+          </div>
+
+          <div class="actions">
+            <button class="primary-btn" id="addToCartBtn">🛒 Ajouter au panier</button>
+            <button class="secondary-btn" id="shareProductBtn" type="button">💬 Partager via WhatsApp</button>
+            <a class="whatsapp-btn" id="whatsappOrderBtn" target="_blank" rel="noopener">💬 Commander via WhatsApp</a>
+          </div>
+
+
+          <div class="meta-grid">
+            <div class="meta-card">
+              <div class="meta-label">Catégorie</div>
+              <div class="meta-value" id="productCategory">—</div>
+            </div>
+            <div class="meta-card">
+              <div class="meta-label">ID produit</div>
+              <div class="meta-value" id="productId">—</div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- SPÉCIFICATIONS -->
+      <section class="specifications-section">
+        <h2 class="section-title">📋 Spécifications</h2>
+        <div class="specs-grid" id="specsGrid">
+          <!-- injecté -->
+        </div>
+      </section>
+
+      <!-- AVIS CLIENTS -->
+      <section class="reviews-section">
+        <div class="reviews-header">
+          <h2 class="section-title">⭐ Avis Clients</h2>
+          <div class="reviews-summary" id="reviewsSummary">
+            <!-- injecté -->
+          </div>
+        </div>
+        <div class="reviews-list" id="reviewsList">
+          <!-- injecté -->
+        </div>
+      </section>
+
+      <!-- STOCK & INFO -->
+      <section class="stock-section">
+        <div class="stock-info" id="stockInfo">
+          <!-- injecté -->
+        </div>
+      </section>
+
+      <!-- Similar -->
+      <section class="similar-section">
+        <div class="section-header">
+          <h2 class="section-title">Produits similaires</h2>
+          <span class="product-count" id="similarCount"></span>
+        </div>
+        <div class="product-grid" id="similarGrid"></div>
+      </section>
+    </div>
+  </main>
+
+  <!-- ========== PANIER SIDEBAR (reuse) ========== -->
+  <div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
+  <aside class="cart-sidebar" id="cartSidebar">
+    <div class="cart-header">
+      <h3>🛒 Mon Panier</h3>
+      <button onclick="toggleCart()">✕</button>
+    </div>
+    <div class="cart-items" id="cartItems"></div>
+    <div class="cart-footer" id="cartFooter" style="display:none;">
+      <div class="cart-total">
+        <span>Total :</span>
+        <strong id="cartTotal">0 FCFA</strong>
+      </div>
+      <button class="checkout-btn" onclick="showCheckout()">Commander maintenant</button>
+    </div>
+    <div class="cart-empty" id="cartEmpty">
+      <p>Votre panier est vide.</p>
+      <small>Ajoutez des produits pour commencer.</small>
+    </div>
+  </aside>
+
+  <!-- ========== MODAL COMMANDE (reuse) ========== -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>📦 Finaliser la commande</h3>
+        <button onclick="closeModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Nom complet *</label>
+          <input type="text" id="orderName" placeholder="Votre nom" />
+        </div>
+        <div class="form-group">
+          <label>Téléphone *</label>
+          <input type="tel" id="orderPhone" placeholder="+242 XX XXX XXXX" />
+        </div>
+        <div class="form-group">
+          <label>Quartier / Adresse de livraison *</label>
+          <input type="text" id="orderAddress" placeholder="Ex: Poto-Poto, Moungali…" />
+        </div>
+        <div class="form-group">
+          <label>Mode de paiement *</label>
+          <div class="payment-options">
+            <label class="payment-opt">
+              <input type="radio" name="payment" value="airtel" /> Airtel Money
+            </label>
+            <label class="payment-opt">
+              <input type="radio" name="payment" value="mtn" /> MTN Money
+            </label>
+            <label class="payment-opt">
+              <input type="radio" name="payment" value="cash" /> Livraison Cash
+            </label>
+          </div>
+        </div>
+        <div class="order-summary" id="orderSummary"></div>
+        <button class="submit-order-btn" onclick="submitOrder()">✅ Confirmer la commande</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== TOAST (reuse) ========== -->
+  <div class="toast" id="toast"></div>
+
+  <!-- ========== FOOTER (simple) ========== -->
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div>
+        <p class="footer-logo">📱 Brazza<span>phone</span></p>
+        <p>Votre boutique téléphonique à Brazzaville</p>
+      </div>
+      <div>
+        <p><strong>Contact</strong></p>
+        <p>WhatsApp : <a href="https://wa.me/242056145113" rel="noopener">+242 056 145 113</a></p>
+        <p>Centre-ville, Brazzaville</p>
+      </div>
+      <div>
+        <p><strong>Paiement accepté</strong></p>
+        <p>📲 Airtel Money</p>
+        <p>📲 MTN Money</p>
+        <p>💵 Livraison Cash</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2025 BrazzaPhone · Tous droits réservés</p>
+    </div>
+  </footer>
+
+  <!-- Important : load script.js en premier (définit window.PRODUCTS + helpers panier) -->
+  <script src="script.js"></script>
+  <script src="checkout.js"></script>
+  <script src="product.js"></script>
+
+</body>
+</html>
+

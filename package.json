@@ -1,0 +1,9 @@
+{
+  "name": "brazzaphone-netlify",
+  "private": true,
+  "version": "1.0.0",
+  "dependencies": {
+    "@netlify/blobs": "^0.1.0"
+  }
+}
+

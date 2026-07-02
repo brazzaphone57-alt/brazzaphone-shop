@@ -1,0 +1,167 @@
+[
+  {
+    "id": 1,
+    "name": "iPhone 14 Pro",
+    "category": "neuf",
+    "price": 450000,
+    "oldPrice": null,
+    "badge": "Neuf 2024",
+    "image": "https://via.placeholder.com/300?text=iPhone+14+Pro",
+    "images": [
+      "https://via.placeholder.com/400?text=iPhone+14+Pro+1",
+      "https://via.placeholder.com/400?text=iPhone+14+Pro+2",
+      "https://via.placeholder.com/400?text=iPhone+14+Pro+3"
+    ],
+    "rating": 4.5,
+    "reviews": 24,
+    "stock": 12,
+    "description": "Dernier modèle Apple avec écran OLED 6.1\", processeur A16 Bionic et caméra 48MP.",
+    "specs": {
+      "Écran": "6.1 pouces OLED 120Hz",
+      "Processeur": "Apple A16 Bionic",
+      "RAM": "6 GB",
+      "Stockage": "256 GB",
+      "Caméra": "48 MP Principal + 12 MP Ultra-large",
+      "Batterie": "3200 mAh",
+      "OS": "iOS 16"
+    },
+    "reviews_list": [
+      { "author": "Jean D.", "rating": 5, "text": "Excellent téléphone, très rapide!" },
+      { "author": "Marie K.", "rating": 4, "text": "Bonne qualité mais cher" }
+    ],
+    "isFavorite": false
+  },
+  {
+    "id": 2,
+    "name": "Samsung Galaxy A53",
+    "category": "neuf",
+    "price": 280000,
+    "oldPrice": 320000,
+    "badge": "-12%",
+    "image": "https://via.placeholder.com/300?text=Galaxy+A53",
+    "images": [
+      "https://via.placeholder.com/400?text=Galaxy+A53+1",
+      "https://via.placeholder.com/400?text=Galaxy+A53+2"
+    ],
+    "rating": 4.2,
+    "reviews": 18,
+    "stock": 8,
+    "description": "Smartphone Samsung performant avec écran AMOLED et batterie longue durée.",
+    "specs": {
+      "Écran": "6.1 pouces AMOLED",
+      "Processeur": "Exynos 1280",
+      "RAM": "6 GB",
+      "Stockage": "128 GB",
+      "Caméra": "64 MP + 12 MP + 5 MP",
+      "Batterie": "5000 mAh"
+    },
+    "reviews_list": [
+      { "author": "Paul R.", "rating": 4, "text": "Très bon rapport qualité/prix" }
+    ],
+    "isFavorite": false
+  },
+  {
+    "id": 3,
+    "name": "iPhone 12 Reconditionné",
+    "category": "reconditionne",
+    "price": 320000,
+    "oldPrice": null,
+    "badge": "Garanti 1 an",
+    "image": "https://via.placeholder.com/300?text=iPhone+12",
+    "images": [
+      "https://via.placeholder.com/400?text=iPhone+12+Recond+1"
+    ],
+    "rating": 4.8,
+    "reviews": 32,
+    "stock": 5,
+    "description": "iPhone 12 reconditionné en excellent état avec garantie 1 an.",
+    "specs": {
+      "Écran": "6.1 pouces OLED",
+      "Processeur": "Apple A14 Bionic",
+      "RAM": "4 GB",
+      "Stockage": "128 GB",
+      "État": "Reconditionné - Excellent"
+    },
+    "reviews_list": [
+      { "author": "Sophie L.", "rating": 5, "text": "Parfait comme neuf!" },
+      { "author": "Tom B.", "rating": 5, "text": "Service excellent" }
+    ],
+    "isFavorite": false
+  },
+  {
+    "id": 4,
+    "name": "Coque Protection Premium",
+    "category": "accessoire",
+    "price": 15000,
+    "oldPrice": null,
+    "badge": null,
+    "image": "https://via.placeholder.com/300?text=Coque+Premium",
+    "images": [
+      "https://via.placeholder.com/400?text=Coque+1"
+    ],
+    "rating": 4.6,
+    "reviews": 12,
+    "stock": 50,
+    "description": "Coque de protection premium compatible avec la plupart des téléphones.",
+    "specs": {
+      "Matière": "Silicone + Polycarbonate",
+      "Couleur": "Noir/Transparent",
+      "Protection": "Chutes jusqu'à 2m"
+    },
+    "reviews_list": [
+      { "author": "Alex M.", "rating": 5, "text": "Protection excellente!" }
+    ],
+    "isFavorite": false
+  },
+  {
+    "id": 5,
+    "name": "Huawei P30",
+    "category": "reconditionne",
+    "price": 200000,
+    "oldPrice": 250000,
+    "badge": "-20%",
+    "image": "https://via.placeholder.com/300?text=Huawei+P30",
+    "images": [
+      "https://via.placeholder.com/400?text=Huawei+P30+1"
+    ],
+    "rating": 4.1,
+    "reviews": 15,
+    "stock": 3,
+    "description": "Huawei P30 reconditionné avec excellente caméra 40MP.",
+    "specs": {
+      "Écran": "6.1 pouces OLED",
+      "Processeur": "Kirin 980",
+      "Caméra": "40 MP + 16 MP + 8 MP"
+    },
+    "reviews_list": [],
+    "isFavorite": false
+  },
+  {
+    "id": 6,
+    "name": "Cable USB-C Fast Charge",
+    "category": "accessoire",
+    "price": 8000,
+    "oldPrice": null,
+    "badge": null,
+    "image": "https://via.placeholder.com/300?text=Cable+USB",
+    "images": [
+      "https://via.placeholder.com/400?text=Cable+USB+1"
+    ],
+    "rating": 4.7,
+    "reviews": 42,
+    "stock": 100,
+    "description": "Câble USB-C haute qualité avec charge rapide 65W.",
+    "specs": {
+      "Type": "USB-C vers USB-C",
+      "Puissance": "65W",
+      "Longueur": "1m",
+      "Certification": "PD 3.0"
+    },
+    "reviews_list": [
+      { "author": "Lisa V.", "rating": 5, "text": "Charge très rapide!" },
+      { "author": "Marc D.", "rating": 5, "text": "Excellent!" }
+    ],
+    "isFavorite": false
+  }
+]
+
