@@ -114,42 +114,34 @@
 
           <div class="filters-row">
             <!-- Filtre Prix -->
-          <div class="filter-group">
-            <label><i data-lucide="wallet" aria-hidden="true"></i> Prix</label>
+            <div class="filter-group">
+              <label><i data-lucide="wallet" aria-hidden="true"></i> Prix</label>
 
+              <div class="price-filter">
+                <input type="number" id="priceMin" placeholder="Min" class="price-input" onchange="applyFilters()" />
+                <span>-</span>
+                <input type="number" id="priceMax" placeholder="Max" class="price-input" onchange="applyFilters()" />
+              </div>
+            </div>
 
+            <!-- Filtre Tri -->
+            <div class="filter-group">
+              <label><i data-lucide="bar-chart-2" aria-hidden="true"></i> Tri</label>
 
-            <div class="price-filter">
-              <input type="number" id="priceMin" placeholder="Min" class="price-input" onchange="applyFilters()" />
-              <span>-</span>
-              <input type="number" id="priceMax" placeholder="Max" class="price-input" onchange="applyFilters()" />
+              <select id="sortBy" class="filter-select" onchange="applyFilters()" title="Tri">
+                <option value="recent">Plus récent</option>
+                <option value="price-low">Prix ↑ (bas)</option>
+                <option value="price-high">Prix ↓ (haut)</option>
+                <option value="rating">⭐ Meilleur avis</option>
+                <option value="popular"><i data-lucide="flame" aria-hidden="true"></i> Populaire</option>
+              </select>
+            </div>
+
+            <!-- Bouton Réinitialiser -->
+            <div class="filter-group">
+              <button class="reset-filters" onclick="resetFilters()"><i data-lucide="refresh-cw" aria-hidden="true"></i> Réinitialiser</button>
             </div>
           </div>
-
-          <!-- Filtre Tri -->
-          <div class="filter-group">
-            <label><i data-lucide="bar-chart-2" aria-hidden="true"></i> Tri</label>
-
-
-            <select id="sortBy" class="filter-select" onchange="applyFilters()" title="Tri">
-
-              <option value="recent">Plus récent</option>
-              <option value="price-low">Prix ↑ (bas)</option>
-              <option value="price-high">Prix ↓ (haut)</option>
-              <option value="rating">⭐ Meilleur avis</option>
-              <option value="popular"><i data-lucide="flame" aria-hidden="true"></i> Populaire</option>
-
-
-            </select>
-          </div>
-
-          <!-- Bouton Réinitialiser -->
-          <div class="filter-group">
-              <button class="reset-filters" onclick="resetFilters()"><i data-lucide="refresh-cw" aria-hidden="true"></i> Réinitialiser</button>
-
-
-          </div>
-        </div>
       </div>
 
       <div class="product-grid" id="productGrid">
