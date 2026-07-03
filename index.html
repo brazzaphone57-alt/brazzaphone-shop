@@ -8,6 +8,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
 </head>
 <body>
 
@@ -22,10 +23,14 @@
           <span class="top-item">📞 Support: +242 05 123 456</span>
         </div>
         <div class="header-top-right">
-          <button class="top-action" title="Aide">❓ Aide</button>
-          <button class="top-action" title="Compte">👤 Mon compte</button>
-          <button class="top-action" title="Commandes">📋 Commandes</button>
-          <button class="top-action" title="Favoris">❤️ Favoris</button>
+          <button class="top-action" title="Aide"><i data-lucide="help-circle" aria-hidden="true"></i> Aide</button>
+          <button class="top-action" title="Compte"><i data-lucide="user" aria-hidden="true"></i> Mon compte</button>
+
+          <button class="top-action" title="Commandes"><i data-lucide="shopping-cart" aria-hidden="true"></i> Commandes</button>
+
+          <button class="top-action" title="Favoris"><i data-lucide="heart" aria-hidden="true"></i> Favoris</button>
+
+
         </div>
       </div>
     </div>
@@ -37,15 +42,19 @@
           <img class="logo-img" src="logo-brazzaphone.png.jpeg" alt="Brazzaphone" />
         </div>
         <div class="search-bar">
-          <span class="search-icon">🔍</span>
+          <span class="search-icon"><i data-lucide="search" aria-hidden="true"></i></span>
+
           <input type="text" id="searchInput" placeholder="Rechercher un téléphone, accessoire…" />
+
           <button onclick="filterProducts()" class="search-btn">Rechercher</button>
         </div>
         <div class="header-actions">
           <button class="action-btn" title="Langage">🌐</button>
           <button class="cart-btn" onclick="toggleCart()">
-            🛒 <span class="cart-badge" id="cartCount">0</span>
+            <i data-lucide="shopping-bag" aria-hidden="true"></i> <span class="cart-badge" id="cartCount">0</span>
+
           </button>
+
         </div>
       </div>
     </div>
@@ -57,11 +66,16 @@
           ☰ Catégories
         </button>
         <div class="nav-inner" id="navInner">
-          <button class="nav-btn active" onclick="filterCategory('all')">🏠 Tout</button>
-          <button class="nav-btn" onclick="filterCategory('neuf')">📱 Neufs</button>
-          <button class="nav-btn" onclick="filterCategory('reconditionne')">♻️ Reconditionnés</button>
-          <button class="nav-btn" onclick="filterCategory('accessoire')">🎧 Accessoires</button>
-          <button class="nav-btn" onclick="filterCategory('promo')">🔥 Promos</button>
+          <button class="nav-btn active" onclick="filterCategory('all')"><i data-lucide="home" aria-hidden="true"></i> Tout</button>
+
+          <button class="nav-btn" onclick="filterCategory('neuf')"><i data-lucide="smartphone" aria-hidden="true"></i> Neufs</button>
+
+          <button class="nav-btn" onclick="filterCategory('reconditionne')"><i data-lucide="refresh-cw" aria-hidden="true"></i> Reconditionnés</button>
+
+          <button class="nav-btn" onclick="filterCategory('accessoire')"><i data-lucide="headphones" aria-hidden="true"></i> Accessoires</button>
+
+          <button class="nav-btn" onclick="filterCategory('promo')"><i data-lucide="flame" aria-hidden="true"></i> Promos</button>
+
         </div>
       </div>
     </nav>
@@ -71,15 +85,18 @@
   <section class="hero">
     <div class="container hero-inner">
       <div class="hero-text">
-        <p class="hero-eyebrow">🔥 Offres exclusives à Brazzaville</p>
+        <p class="hero-eyebrow"><i data-lucide="flame" aria-hidden="true"></i> Offres exclusives à Brazzaville</p>
+
         <h1>Téléphones & Accessoires<br /><span class="hero-accent">au meilleur prix</span></h1>
         <p class="hero-sub">Paiement Airtel Money · MTN Money · Livraison cash</p>
         <button class="hero-cta" onclick="filterCategory('all')">Voir les produits</button>
       </div>
       <div class="hero-badges">
-        <div class="badge-card">✅ Produits garantis</div>
-        <div class="badge-card">🚚 Livraison rapide</div>
+        <div class="badge-card"><i data-lucide="package" aria-hidden="true"></i> Produits garantis</div>
+        <div class="badge-card"><i data-lucide="truck" aria-hidden="true"></i> Livraison rapide</div>
+
         <div class="badge-card">💬 WhatsApp 24/7</div>
+
       </div>
     </div>
   </section>
@@ -94,10 +111,14 @@
 
       <!-- FILTRES AVANCÉS -->
       <div class="filters-section">
-        <div class="filters-row">
-          <!-- Filtre Prix -->
+
+          <div class="filters-row">
+            <!-- Filtre Prix -->
           <div class="filter-group">
-            <label>💰 Prix</label>
+            <label><i data-lucide="wallet" aria-hidden="true"></i> Prix</label>
+
+
+
             <div class="price-filter">
               <input type="number" id="priceMin" placeholder="Min" class="price-input" onchange="applyFilters()" />
               <span>-</span>
@@ -107,19 +128,26 @@
 
           <!-- Filtre Tri -->
           <div class="filter-group">
-            <label>📊 Tri</label>
-            <select id="sortBy" class="filter-select" onchange="applyFilters()">
+            <label><i data-lucide="bar-chart-2" aria-hidden="true"></i> Tri</label>
+
+
+            <select id="sortBy" class="filter-select" onchange="applyFilters()" title="Tri">
+
               <option value="recent">Plus récent</option>
               <option value="price-low">Prix ↑ (bas)</option>
               <option value="price-high">Prix ↓ (haut)</option>
               <option value="rating">⭐ Meilleur avis</option>
-              <option value="popular">🔥 Populaire</option>
+              <option value="popular"><i data-lucide="flame" aria-hidden="true"></i> Populaire</option>
+
+
             </select>
           </div>
 
           <!-- Bouton Réinitialiser -->
           <div class="filter-group">
-            <button class="reset-filters" onclick="resetFilters()">🔄 Réinitialiser</button>
+              <button class="reset-filters" onclick="resetFilters()"><i data-lucide="refresh-cw" aria-hidden="true"></i> Réinitialiser</button>
+
+
           </div>
         </div>
       </div>
@@ -128,8 +156,9 @@
         <!-- Injecté par JS -->
       </div>
       <div class="empty-state" id="emptyState" style="display:none;">
-        <p>😕 Aucun produit trouvé.</p>
+        <p><i data-lucide="circle-x" aria-hidden="true"></i> Aucun produit trouvé.</p>
       </div>
+
     </div>
   </main>
 
@@ -137,7 +166,9 @@
   <div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
   <aside class="cart-sidebar" id="cartSidebar">
     <div class="cart-header">
-      <h3>🛒 Mon Panier</h3>
+      <h3><i data-lucide="shopping-bag" aria-hidden="true"></i> Mon Panier</h3>
+
+
       <button onclick="toggleCart()">✕</button>
     </div>
     <div class="cart-items" id="cartItems"></div>
@@ -158,7 +189,9 @@
   <div class="modal-overlay" id="modalOverlay">
     <div class="modal">
       <div class="modal-header">
-        <h3>📦 Finaliser la commande</h3>
+        <h3><i data-lucide="package" aria-hidden="true"></i> Finaliser la commande</h3>
+
+
         <button onclick="closeModal()">✕</button>
       </div>
       <div class="modal-body">
@@ -189,7 +222,9 @@
           </div>
         </div>
         <div class="order-summary" id="orderSummary"></div>
-        <button class="submit-order-btn" onclick="submitOrder()">✅ Confirmer la commande</button>
+        <button class="submit-order-btn" onclick="submitOrder()"><i data-lucide="log-out" aria-hidden="true"></i> Confirmer la commande</button>
+
+
       </div>
     </div>
   </div>
@@ -202,15 +237,18 @@
     <div class="footer-top">
       <div class="container">
         <div class="footer-banner">
-          <div class="footer-banner-item">
-            <span class="footer-banner-icon">📍</span>
+      <div class="footer-banner-item">
+            <span class="footer-banner-icon"><i data-lucide="map-pin" aria-hidden="true"></i></span>
+
             <div>
+
               <strong>Livraison</strong>
               <p>Brazzaville · Centre-ville</p>
             </div>
           </div>
           <div class="footer-banner-item">
-            <span class="footer-banner-icon">💬</span>
+            <span class="footer-banner-icon"><i data-lucide="headphones" aria-hidden="true"></i></span>
+
             <div>
               <strong>WhatsApp 24/7</strong>
               <p><a href="https://wa.me/242056145113" rel="noopener">+242 056 145 113</a></p>
@@ -221,7 +259,8 @@
     </div>
     <div class="container footer-inner">
       <div>
-        <p class="footer-logo">📱 Brazza<span>phone</span></p>
+        <p class="footer-logo"><i data-lucide="smartphone" aria-hidden="true"></i> Brazza<span>phone</span></p>
+
         <p>Votre boutique téléphonique à Brazzaville</p>
       </div>
       <div>
@@ -241,6 +280,9 @@
     </div>
   </footer>
 
+
   <script src="script.js"></script>
+  <script>lucide.createIcons();</script>
 </body>
 </html>
+

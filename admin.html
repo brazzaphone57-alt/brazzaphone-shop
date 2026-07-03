@@ -8,6 +8,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="admin.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
 </head>
 <body>
 
@@ -31,7 +32,8 @@
           <div class="pass-row">
             <input type="password" id="loginPass" placeholder="••••••••" aria-label="Mot de passe" />
 
-          <button type="button" class="toggle-pass" onclick="togglePassword()">👁️</button>
+          <button type="button" class="toggle-pass" onclick="togglePassword()"><i data-lucide="eye" aria-hidden="true"></i></button>
+
         </div>
       </div>
       <button onclick="doLogin()">Se connecter</button>
@@ -52,23 +54,27 @@
       <div class="sidebar-header">
         <div class="sidebar-logo">
           <img class="sidebar-logo-img" src="logo-brazzaphone.png.jpeg" alt="Brazzaphone" />
-          <span class="sidebar-logo-text">📱 Brazza<span>phone</span></span>
+          <span class="sidebar-logo-text"><i data-lucide="smartphone" aria-hidden="true"></i> Brazza<span>phone</span></span>
+
         </div>
         <button class="sidebar-close" onclick="toggleAdminMenu()" aria-label="Fermer">✕</button>
       </div>
       <nav class="sidebar-nav">
         <button class="sidebar-btn active" onclick="showSection('products')">
-          <span class="sidebar-icon">📦</span>
+          <span class="sidebar-icon"><i data-lucide="package" aria-hidden="true"></i></span>
+
           <span class="sidebar-text">Produits</span>
           <span class="sidebar-badge" id="productsBadge" style="display:none;"></span>
         </button>
         <button class="sidebar-btn" onclick="showSection('orders')">
-          <span class="sidebar-icon">🛒</span>
+          <span class="sidebar-icon"><i data-lucide="shopping-cart" aria-hidden="true"></i></span>
+
           <span class="sidebar-text">Commandes</span>
           <span class="sidebar-badge" id="ordersBadge" style="display:none;"></span>
         </button>
         <button class="sidebar-btn" onclick="showSection('stats')">
-          <span class="sidebar-icon">📊</span>
+          <span class="sidebar-icon"><i data-lucide="bar-chart-2" aria-hidden="true"></i></span>
+
           <span class="sidebar-text">Statistiques</span>
         </button>
       </nav>
@@ -76,15 +82,18 @@
       <!-- Stats rapides -->
       <div class="sidebar-stats" id="sidebarStats">
         <div class="stat-item">
-          <span>📦 Produits</span>
+          <span><i data-lucide="package" aria-hidden="true"></i> Produits</span>
+
           <strong id="sidebarProductCount">0</strong>
         </div>
         <div class="stat-item">
-          <span>⏳ En attente</span>
+          <span><i data-lucide="clock" aria-hidden="true"></i> En attente</span>
+
           <strong id="sidebarPendingCount" style="color: #ff9800;">0</strong>
         </div>
         <div class="stat-item">
-          <span>💵 Revenus</span>
+          <span><i data-lucide="wallet" aria-hidden="true"></i> Revenus</span>
+
           <strong id="sidebarRevenue">0 FCFA</strong>
         </div>
       </div>
@@ -107,7 +116,8 @@
     <!-- Top Header -->
     <header class="admin-header">
       <div class="header-left">
-        <h1 class="section-title" id="sectionTitle">📦 Gestion des Produits</h1>
+        <h1 class="section-title" id="sectionTitle"><i data-lucide="package" aria-hidden="true"></i> Gestion des Produits</h1>
+
       </div>
       <div class="header-right">
         <div class="header-info">
@@ -139,11 +149,13 @@
         <!-- Contrôles -->
         <div class="section-controls">
           <div class="control-group search">
-            <input type="text" id="adminSearch" placeholder="🔍 Rechercher par nom…" oninput="renderAdminProducts()" />
+            <input type="text" id="adminSearch" placeholder="Rechercher par nom…" title="Rechercher" oninput="renderAdminProducts()" />
+
           </div>
           <div class="control-group filter">
             <select id="adminCatFilter" onchange="renderAdminProducts()" class="filter-select">
-              <option value="all">📋 Toutes catégories</option>
+              <option value="all"><i data-lucide="download" aria-hidden="true"></i> Toutes catégories</option>
+
               <option value="neuf">📱 Neufs</option>
               <option value="reconditionne">♻️ Reconditionnés</option>
               <option value="accessoire">🎧 Accessoires</option>
@@ -335,6 +347,9 @@
   <script src="admin_orders_utils.js"></script>
   <script src="admin_orders.js"></script>
   <script src="admin.js"></script>
+  <script>lucide.createIcons();</script>
 </body>
 </html>
+
+
 
