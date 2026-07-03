@@ -305,44 +305,117 @@ function renderStats() {
 }
 
 /* ===== MODAL PRODUIT ===== */
-function clearImagePreview() {
-  const wrap   = document.getElementById("pImagePreviewWrap");
-  const img    = document.getElementById("pImagePreview");
-  const file   = document.getElementById("pImageFile");
-  const hidden = document.getElementById("pImage");
-  if (img)    img.src = "";
-  if (wrap)   wrap.style.display = "none";
-  if (file)   file.value = "";
-  if (hidden) hidden.value = "";
+const MAX_PRODUCT_IMAGES = 5;
+
+let selectedImages = []; // dataURL[]
+
+function getExistingImagesForProduct(p) {
+  if (!p) return [];
+  if (Array.isArray(p.images) && p.images.length) return p.images;
+  if (p.image) return [p.image];
+  return [];
 }
 
-function setImagePreview(data) {
-  const wrap   = document.getElementById("pImagePreviewWrap");
-  const img    = document.getElementById("pImagePreview");
+function updateProductImagesHidden() {
+  // Conserver image (champ string) pour compatibilité si d'autres parties l'utilisent.
   const hidden = document.getElementById("pImage");
-  if (!data) { clearImagePreview(); return; }
-  if (img)    img.src = data;
-  if (wrap)   wrap.style.display = "block";
-  if (hidden) hidden.value = data;
+  if (!hidden) return;
+  hidden.value = selectedImages[0] || "";
+}
+
+function renderSelectedImagesPreview() {
+  const wrap = document.getElementById("productImagesPreviewWrap");
+  const list = document.getElementById("productImagesPreviewList");
+  if (!wrap || !list) return;
+
+  if (!selectedImages.length) {
+    wrap.style.display = "none";
+    list.innerHTML = "";
+    updateProductImagesHidden();
+    return;
+  }
+
+  wrap.style.display = "block";
+  list.innerHTML = `
+    <div class="image-preview-grid">
+      ${selectedImages.map((src, idx) => {
+        const safeIdx = idx;
+        return `
+          <div class="preview-item">
+            <img src="${src}" alt="Aperçu ${idx + 1}" />
+            <button
+              type="button"
+              class="btn-secondary image-remove remove-btn"
+              data-index="${safeIdx}"
+              aria-label="Retirer l’image ${idx + 1}"
+            >
+              ✕
+            </button>
+          </div>
+        `;
+      }).join("")}
+    </div>
+  `;
+
+  updateProductImagesHidden();
+}
+
+function clearSelectedImages() {
+  selectedImages = [];
+  renderSelectedImagesPreview();
+  const fileInput = document.getElementById("productImages");
+  if (fileInput) fileInput.value = "";
 }
 
 (function initImageUpload() {
-  const fileInput = document.getElementById("pImageFile");
+  const fileInput = document.getElementById("productImages");
   if (!fileInput) return;
-  fileInput.addEventListener("change", () => {
-    const file = fileInput.files && fileInput.files[0];
-    if (!file) { clearImagePreview(); return; }
-    if (file.size > 10 * 1024 * 1024) {
-      showAdminToast("⚠️ Image trop lourde (max 10MB).");
-      fileInput.value = "";
-      clearImagePreview();
+
+  fileInput.addEventListener("change", async () => {
+    const files = Array.from(fileInput.files || []);
+    if (!files.length) {
+      clearSelectedImages();
       return;
     }
-    const reader = new FileReader();
-    reader.onload = () => setImagePreview(String(reader.result || ""));
-    reader.readAsDataURL(file);
+
+    // Limite à MAX_PRODUCT_IMAGES
+    const remaining = Math.max(0, MAX_PRODUCT_IMAGES - selectedImages.length);
+    const filesToRead = files.slice(0, remaining);
+
+    if (!filesToRead.length) {
+      showAdminToast(`⚠️ Maximum ${MAX_PRODUCT_IMAGES} images.`);
+      fileInput.value = "";
+      return;
+    }
+
+    const toDataURL = (file) => new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result || ""));
+      reader.onerror = () => reject(new Error("FileReader error"));
+      reader.readAsDataURL(file);
+    });
+
+    try {
+      for (const file of filesToRead) {
+        if (file.size > 10 * 1024 * 1024) {
+          showAdminToast("⚠️ Image trop lourde (max 10MB).");
+          fileInput.value = "";
+          continue;
+        }
+        const dataUrl = await toDataURL(file);
+        selectedImages.push(dataUrl);
+      }
+
+      renderSelectedImagesPreview();
+      // Reset input pour permettre re-sélection identique
+      fileInput.value = "";
+    } catch (e) {
+      console.error(e);
+      showAdminToast("⚠️ Erreur lecture images.");
+    }
   });
 })();
+
 
 function openProductModal(id = null) {
   const modal = document.getElementById("productModal");
@@ -359,12 +432,15 @@ function openProductModal(id = null) {
     document.getElementById("pBadge").value    = p.badge || "";
     document.getElementById("pStock").value    = p.stock || 0;
     document.getElementById("pDescription").value = p.description || "";
-    document.getElementById("pImage").value    = p.image;
-    setImagePreview(p.image);
-    
+
+    // Images : support images[] (nouveau) + fallback image (ancien)
+    selectedImages = getExistingImagesForProduct(p);
+    document.getElementById("pImage").value = selectedImages[0] || "";
+    renderSelectedImagesPreview();
+
     // Charger les spécifications
     renderSpecRows(p.specs || {});
-    
+
     // Charger les avis
     renderReviewRows(p.reviews_list || []);
   } else {
@@ -374,10 +450,9 @@ function openProductModal(id = null) {
     });
     document.getElementById("pCategory").value = "neuf";
     document.getElementById("pBadge").value    = "";
-    const fileInput = document.getElementById("pImageFile");
-    if (fileInput) fileInput.value = "";
-    clearImagePreview();
-    
+
+    clearSelectedImages();
+
     // Initialiser des lignes vides pour specs et avis
     document.getElementById("specsContainer").innerHTML = "";
     document.getElementById("reviewsContainer").innerHTML = "";
@@ -468,7 +543,23 @@ function closeProductModal() {
 
 document.addEventListener("click", e => {
   const btn = e.target && e.target.closest && e.target.closest(".image-remove");
-  if (btn) clearImagePreview();
+  if (!btn) return;
+
+  // Si on clique un X individuel, on supprime l'image indexée.
+  const idxRaw = btn.getAttribute("data-index");
+  if (idxRaw !== null && idxRaw !== undefined) {
+    const idx = parseInt(idxRaw);
+    if (!Number.isNaN(idx)) {
+      selectedImages = selectedImages.filter((_, i) => i !== idx);
+      renderSelectedImagesPreview();
+      const fileInput = document.getElementById("productImages");
+      if (fileInput) fileInput.value = "";
+    }
+    return;
+  }
+
+  // Fallback: si un bouton sans index existe (ancien code), on efface tout.
+  clearSelectedImages();
 });
 
 function saveProduct() {
@@ -479,8 +570,13 @@ function saveProduct() {
   const badge    = document.getElementById("pBadge").value || null;
   const stock    = parseInt(document.getElementById("pStock").value) || 0;
   const description = document.getElementById("pDescription").value.trim() || "";
-  const image    = (document.getElementById("pImage").value || "").trim() || "images/placeholder.jpg";
   const editId   = parseInt(document.getElementById("editId").value) || null;
+
+  // images : tableau source de vérité
+  // fallback si aucune image sélectionnée
+  const images = (selectedImages && selectedImages.length)
+    ? selectedImages.slice(0, MAX_PRODUCT_IMAGES)
+    : [((document.getElementById("pImage").value || "").trim() || "images/placeholder.jpg")];
 
   // Validation
   if (!name || !price || stock < 0) { 
@@ -508,7 +604,16 @@ function saveProduct() {
   });
 
   const productData = {
-    name, category, price, oldPrice, badge, image, stock, description,
+    name,
+    category,
+    price,
+    oldPrice,
+    badge,
+    images, // source de vérité (tableau)
+    // compat : conserver aussi un champ image unique pour certaines parties
+    image: images[0],
+    stock,
+    description,
     specs,
     reviews_list,
     rating: 4.5, // Default rating
@@ -519,12 +624,14 @@ function saveProduct() {
   if (editId) {
     const idx = products.findIndex(p => p.id === editId);
     if (idx > -1) {
+      // Compatibilité : certaines anciennes données ont un champ image seul.
+      // Ici on force images (tableau) + image (1er élément) via productData.
       products[idx] = { ...products[idx], ...productData, id: editId };
     }
     showAdminToast("✅ Produit modifié !");
   } else {
     const newId = products.length ? Math.max(...products.map(p => p.id)) + 1 : 1;
-    products.push({ ...productData, id: newId, images: [image] });
+    products.push({ ...productData, id: newId });
     showAdminToast("✅ Produit ajouté !");
   }
 

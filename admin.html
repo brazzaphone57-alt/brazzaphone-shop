@@ -303,14 +303,7 @@
 
         <div class="form-row">
           <div class="form-group">
-            <label>Image produit</label>
-            <input type="file" id="pImageFile" accept="image/*" aria-label="Image produit" />
-            <input type="hidden" id="pImage" />
-            <div id="pImagePreviewWrap" class="image-preview-wrap" style="display:none;">
-              <div class="image-preview-title">Aperçu</div>
-              <img id="pImagePreview" class="image-preview" alt="Aperçu image" />
-              <button type="button" class="btn-secondary image-remove" onclick="clearImagePreview()">Retirer</button>
-            </div>
+            <label>Images produit (max 5)</label>            <input type="file" id="productImages" accept="image/*" multiple aria-label="Images produit" />            <input type="hidden" id="pImage" />            <div id="productImagesPreviewWrap" class="image-preview-wrap" style="display:none;">              <div class="image-preview-title">Aperçu</div>              <div id="productImagesPreviewList" class="product-images-preview-list"></div>            </div>
           </div>
         </div>
 

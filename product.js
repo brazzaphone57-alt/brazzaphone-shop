@@ -151,7 +151,7 @@
         <div class="product-card" role="button" tabindex="0" onclick="location.href='product.html?id=${p.id}'">
           ${badgeHTML}
           <div class="product-img-wrap">
-            <img src="${p.image}" alt="${escapeHtml(p.name)}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23eee%22 width=%22200%22 height=%22200%22/><text fill=%22%23aaa%22 font-size=%2240%22 x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22>📱</text></svg>'" />
+            <img src="${(Array.isArray(p.images) && p.images.length ? p.images[0] : p.image) || ''}" alt="${escapeHtml(p.name)}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23eee%22 width=%22200%22 height=%22200%22/><text fill=%22%23aaa%22 font-size=%2240%22 x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22>📱</text></svg>'" />
           </div>
           <div class="product-info">
             <span class="product-category-tag">${categoryLabel(p.category)}</span>
