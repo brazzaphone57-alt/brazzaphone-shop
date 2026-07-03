@@ -728,10 +728,13 @@ a { color: inherit; text-decoration: none; }
 
   .filters-row {
     gap: 8px;
+    flex-direction: column;
+    align-items: stretch;
   }
 
   .filter-group {
-    min-width: 100px;
+    width: 100%;
+    min-width: 0;
     flex: 1;
   }
 
