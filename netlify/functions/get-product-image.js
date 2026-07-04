@@ -72,11 +72,19 @@ exports.handler = async (event) => {
       tokenSet: Boolean(process.env.NETLIFY_AUTH_TOKEN)
     });
 
+    // getWithMetadata avec type "arrayBuffer" renvoie toujours un format
+    // binaire prévisible (result.data) + les metadata stockées à l'upload
+    // (result.metadata.contentType), au lieu du texte par défaut du SDK.
+    const result = await store.getWithMetadata(key, { type: "arrayBuffer" });
 
-    // @netlify/blobs getStore.get(key) can return raw Buffer or { data, contentType } depending on version.
-    const blob = await store.get(key);
+    console.log("[get-product-image] result", {
+      key,
+      found: Boolean(result),
+      hasMetadata: Boolean(result?.metadata),
+      contentType: result?.metadata?.contentType
+    });
 
-    if (!blob) {
+    if (!result || !result.data) {
       return {
         statusCode: 404,
         headers: {
@@ -87,45 +95,8 @@ exports.handler = async (event) => {
       };
     }
 
-    // Normalize different possible return shapes.
-    let buffer;
-    let contentType = "application/octet-stream";
-
-    if (Buffer.isBuffer(blob)) {
-      buffer = blob;
-    } else if (blob && typeof blob === "object") {
-      if (Buffer.isBuffer(blob.data)) {
-        buffer = blob.data;
-      } else if (Buffer.isBuffer(blob.buffer)) {
-        buffer = blob.buffer;
-      }
-
-      contentType = blob.contentType || blob.mimeType || contentType;
-    }
-
-    if (!buffer) {
-      // If blobs SDK returns string/base64, try to recover.
-      if (typeof blob === "string") {
-        // Not expected; treat as 404
-        return {
-          statusCode: 404,
-          headers: {
-            ...corsHeaders(),
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ error: "Unexpected blob payload" })
-        };
-      }
-
-      return {
-        statusCode: 500,
-        headers: {
-          ...corsHeaders(),
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ error: "Could not read blob" })
-      };
-    }
+    const buffer = Buffer.from(result.data);
+    const contentType = result.metadata?.contentType || "application/octet-stream";
 
     return {
       statusCode: 200,
@@ -138,6 +109,9 @@ exports.handler = async (event) => {
       isBase64Encoded: true
     };
   } catch (e) {
+    console.error("[get-product-image] handler catch", {
+      error: e?.message || String(e)
+    });
     return {
       statusCode: 500,
       headers: {
@@ -148,4 +122,3 @@ exports.handler = async (event) => {
     };
   }
 };
-
