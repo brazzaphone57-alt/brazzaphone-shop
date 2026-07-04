@@ -48,6 +48,13 @@ exports.handler = async (event) => {
       token: process.env.NETLIFY_AUTH_TOKEN
     });
 
+    console.log("[list-blobs] store ready", {
+      name: storeName,
+      siteID: process.env.NETLIFY_SITE_ID,
+      tokenSet: Boolean(process.env.NETLIFY_AUTH_TOKEN)
+    });
+
+
     // @netlify/blobs: list API peut varier selon version.
     // On essaye store.list() en supposant qu'elle renvoie une liste de clés.
     const listing = await store.list();

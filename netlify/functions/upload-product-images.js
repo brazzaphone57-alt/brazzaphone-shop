@@ -138,7 +138,12 @@ exports.handler = async (event) => {
       token: process.env.NETLIFY_AUTH_TOKEN
     });
 
-    console.log("[upload-product-images] store ready");
+    console.log("[upload-product-images] store ready", {
+      name: IMAGES_STORE,
+      siteID: process.env.NETLIFY_SITE_ID,
+      tokenSet: Boolean(process.env.NETLIFY_AUTH_TOKEN)
+    });
+
 
     const urls = [];
     const errors = [];

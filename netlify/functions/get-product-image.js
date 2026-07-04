@@ -65,6 +65,14 @@ exports.handler = async (event) => {
       token: process.env.NETLIFY_AUTH_TOKEN
     });
 
+    console.log("[get-product-image] store ready", {
+      name: IMAGES_STORE,
+      key,
+      siteID: process.env.NETLIFY_SITE_ID,
+      tokenSet: Boolean(process.env.NETLIFY_AUTH_TOKEN)
+    });
+
+
     // @netlify/blobs getStore.get(key) can return raw Buffer or { data, contentType } depending on version.
     const blob = await store.get(key);
 
