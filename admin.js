@@ -574,9 +574,28 @@ async function saveProduct() {
   const editId   = parseInt(document.getElementById("editId").value) || null;
 
   // images : tableau source de vérité (peut être base64 dataURL)
-  const selected = (selectedImages && selectedImages.length)
+  // Protection anti-données corrompues : ne pas enregistrer un champ image qui ressemble à un simple ID (ex: "7_0").
+  // Attendu: soit dataURL, soit une URL blob Netlify: `/.netlify/blobs/product-images/...`, soit au moins un chemin valide (images/...).
+  const selectedRaw = (selectedImages && selectedImages.length)
     ? selectedImages.slice(0, MAX_PRODUCT_IMAGES)
     : [((document.getElementById("pImage").value || "").trim() || "images/placeholder.jpg")];
+
+  const isValidImageRef = (s) => {
+    if (typeof s !== 'string') return false;
+    const v = s.trim();
+    if (!v) return false;
+    if (v.startsWith('data:image/')) return true;
+    if (v.startsWith('https://') || v.startsWith('http://')) return true;
+    // chemins relatifs “classiques” (ancien placeholder)
+    if (v.startsWith('images/') || v.startsWith('./images/') || v.startsWith('../images/')) return true;
+    // on accepte aussi la forme serverless get-product-image
+    if (v.startsWith('/.netlify/functions/get-product-image')) return true;
+    return false;
+  };
+
+
+  const selected = selectedRaw.filter(isValidImageRef);
+
 
   // Validation
 
@@ -609,7 +628,18 @@ async function saveProduct() {
 
   // Upload images si ce sont des dataURLs
   let images = selected;
+  // Si on a au moins 1 image mais qu'aucun dataURL n'est présent, on ne fait pas d'upload.
+  // (Dans ce cas, `images` doit déjà être une vraie URL blob, sinon l'affichage sera invalide.)
   const needsUpload = Array.isArray(images) && images.some(x => typeof x === 'string' && x.startsWith('data:'));
+
+  // Sécurité supplémentaire : si on a des références de type "<digits>_<digits>" qui ont fuit,
+  // on force un fallback vers un vrai placeholder pour éviter de générer /.netlify/blobs/product-images/<id>.
+  // (On protège aussi contre les chaînes "images/placeholder.jpg" si vide.)
+  const isBadKeyLike = (s) => typeof s === 'string' && /^\d+_\d+$/.test(s.trim());
+  if (Array.isArray(images)) {
+    images = images.map(img => (isBadKeyLike(img) ? "images/placeholder.jpg" : img));
+  }
+
 
   if (needsUpload) {
     // Debug (visible dans console) + toast pour confirmer que l'appel part.

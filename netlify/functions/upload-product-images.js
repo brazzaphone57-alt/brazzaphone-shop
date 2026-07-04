@@ -49,8 +49,9 @@ async function storeImageAsUrl({ store, key, dataUrl }) {
   // Store as binary
   await store.set(key, parsed.buffer, { contentType: parsed.mime });
 
-  // Deterministic URL pattern used by your migration function
-  return `/.netlify/blobs/${IMAGES_STORE}/${encodeURIComponent(key)}`;
+  // URL de lecture via fonction serverless (pas via route statique blobs)
+  return `/.netlify/functions/get-product-image?key=${encodeURIComponent(key)}`;
+
 }
 
 exports.handler = async (event) => {
