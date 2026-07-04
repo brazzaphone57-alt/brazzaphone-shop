@@ -1,12 +1,8 @@
-# TODO — Optimisation chargement boutique Brazzaphone
+# TODO
 
-- [x] 1) Diagnostiquer: la fonction `/.netlify/functions/save-products` renvoie toute la liste produits depuis `@netlify/blobs` (payload potentiellement énorme si images en base64)
-- [x] 2) Ajouter `Cache-Control` + `s-maxage` sur la réponse **GET** de `netlify/functions/save-products.js`
-- [ ] 3) Déployer et re-tester: cold start vs warm start, et TTFB/transfer (Chrome DevTools → Network)
-- [ ] 4) Migration images: enlever les images base64 du JSON produits
-  - Stocker images en fichier binaire (Netlify Blobs en mode fichier) ou service externe (Cloudinary/imgbb)
-  - Conserver dans le JSON uniquement des URLs d’images
-- [ ] 5) Compresser/redimensionner images côté admin avant upload (max 800-1000px, WebP si possible)
-- [ ] 6) Ajouter/ajuster headers cache côté images (long cache) + éventuellement ETag/If-None-Match JSON
-- [ ] 7) Valider performance: passer ~12s → <2-3s sur la home
+- [x] Inspect `netlify/functions/upload-product-images.js` and related blobs functions (`list-blobs.js`, `get-product-image.js`).
+- [x] Add detailed `console.log` statements at each key step of `upload-product-images.js` (before/after JSON parse, before `store.set`, after success, and before final return).
+- [ ] Run a quick local lint/parse check if available (optional).
+- [ ] Provide summary of changes.
+
 
