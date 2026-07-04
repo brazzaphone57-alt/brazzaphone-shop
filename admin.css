@@ -265,6 +265,36 @@ body { font-family: 'Inter', sans-serif; background: #F5F5F5; color: #1A1A1A; }
   flex-direction: row;
 }
 
+/* ── BURGER MOBILE (masqué sur desktop) ── */
+.admin-burger {
+  display: none;
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 1100;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  border: none;
+  background: #1A1A1A;
+  color: #fff;
+  font-size: 1.3rem;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,.25);
+}
+
+/* ── OVERLAY assombri derrière le tiroir mobile ── */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.5);
+  z-index: 900;
+}
+.sidebar-overlay.open { display: block; }
+
 /* ── SIDEBAR ── */
 .sidebar {
   width: 260px;
@@ -279,7 +309,7 @@ body { font-family: 'Inter', sans-serif; background: #F5F5F5; color: #1A1A1A; }
   height: 100vh;
   overflow-y: auto;
   box-shadow: 2px 0 12px rgba(0,0,0,.15);
-  z-index: 100;
+  z-index: 1000;
 }
 
 .sidebar-header {
@@ -542,6 +572,7 @@ body { font-family: 'Inter', sans-serif; background: #F5F5F5; color: #1A1A1A; }
 /* ── MAIN CONTENT ── */
 .admin-main {
   flex: 1;
+  min-width: 0;
   padding: 24px;
   overflow-y: auto;
   background: #F5F5F5;
@@ -847,10 +878,36 @@ body { font-family: 'Inter', sans-serif; background: #F5F5F5; color: #1A1A1A; }
   transform: translateX(-50%) translateY(0);
 }
 
-/* Responsive (keep existing behavior) */
+/* Responsive (sidebar transformée en tiroir mobile) */
 @media (max-width: 768px) {
-  .admin-burger { display: block !important; }
-  .dashboard { flex-direction: column !important; }
+  .admin-burger { display: flex !important; }
+
+  .dashboard { flex-direction: row !important; }
+
+  /* La sidebar devient un tiroir plein écran, caché par défaut hors champ */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: min(280px, 82vw);
+    min-width: 0;
+    transform: translateX(-100%);
+    transition: transform .3s ease;
+  }
+  .sidebar.open {
+    transform: translateX(0);
+  }
+  .sidebar-close { display: block; }
+
+  /* Le contenu principal prend toute la largeur, avec espace pour le burger */
+  .admin-main {
+    width: 100%;
+    padding-top: 72px;
+  }
+  .admin-header {
+    padding-left: 68px;
+  }
+
   .form-row { grid-template-columns: 1fr !important; }
 }
-
