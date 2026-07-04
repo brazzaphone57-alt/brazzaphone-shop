@@ -46,13 +46,23 @@ async function storeImageAsUrl({ store, key, dataUrl }) {
   const parsed = blobFromDataUrl(dataUrl);
   if (!parsed) return null;
 
-  // Store as binary
-  await store.set(key, parsed.buffer, { contentType: parsed.mime });
+  try {
+    // Store as binary
+    await store.set(key, parsed.buffer, { contentType: parsed.mime });
+  } catch (e) {
+    console.error("[upload-product-images] store.set failed", {
+      key,
+      mime: parsed?.mime,
+      error: e?.message || String(e)
+    });
+    throw e;
+  }
 
   // URL de lecture via fonction serverless (pas via route statique blobs)
   return `/.netlify/functions/get-product-image?key=${encodeURIComponent(key)}`;
 
 }
+
 
 exports.handler = async (event) => {
   if (event.httpMethod === "OPTIONS") {
@@ -78,6 +88,13 @@ exports.handler = async (event) => {
     const body = event.body ? JSON.parse(event.body) : {};
     const productId = body.productId;
     const images = Array.isArray(body.images) ? body.images : [];
+
+    console.log("[upload-product-images] input", {
+      productId,
+      imagesCount: images.length,
+      IMAGES_STORE
+    });
+
 
     if (!productId) {
       return {
@@ -117,6 +134,7 @@ exports.handler = async (event) => {
       }
 
       urls.push(url);
+
     }
 
     const ok = errors.length === 0;
