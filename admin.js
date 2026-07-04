@@ -562,7 +562,8 @@ document.addEventListener("click", e => {
   clearSelectedImages();
 });
 
-function saveProduct() {
+async function saveProduct() {
+
   const name     = document.getElementById("pName").value.trim();
   const category = document.getElementById("pCategory").value;
   const price    = parseInt(document.getElementById("pPrice").value);
@@ -572,16 +573,16 @@ function saveProduct() {
   const description = document.getElementById("pDescription").value.trim() || "";
   const editId   = parseInt(document.getElementById("editId").value) || null;
 
-  // images : tableau source de vérité
-  // fallback si aucune image sélectionnée
-  const images = (selectedImages && selectedImages.length)
+  // images : tableau source de vérité (peut être base64 dataURL)
+  const selected = (selectedImages && selectedImages.length)
     ? selectedImages.slice(0, MAX_PRODUCT_IMAGES)
     : [((document.getElementById("pImage").value || "").trim() || "images/placeholder.jpg")];
 
   // Validation
-  if (!name || !price || stock < 0) { 
-    showAdminToast("⚠️ Vérifiez : Nom, Prix et Stock obligatoires !"); 
-    return; 
+
+  if (!name || !price || stock < 0) {
+    showAdminToast("⚠️ Vérifiez : Nom, Prix et Stock obligatoires !");
+    return;
   }
 
   // Récupérer les spécifications
@@ -603,20 +604,62 @@ function saveProduct() {
     }
   });
 
+  // Déterminer un id final AVANT upload (pour nommage des images)
+  const finalId = editId || (products.length ? Math.max(...products.map(p => p.id)) + 1 : 1);
+
+  // Upload images si ce sont des dataURLs
+  let images = selected;
+  const needsUpload = Array.isArray(images) && images.some(x => typeof x === 'string' && x.startsWith('data:'));
+
+  if (needsUpload) {
+    // Debug (visible dans console) + toast pour confirmer que l'appel part.
+    console.log("upload-product-images: starting", { finalId, count: images.length });
+    showAdminToast("⏫ Upload des images...");
+
+    try {
+      const res = await fetch("/.netlify/functions/upload-product-images", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productId: finalId, images })
+      });
+
+      const payload = await res.json().catch(() => null);
+      if (!res.ok || !payload || payload.success !== true) {
+        const msg = payload && payload.errors && payload.errors.length
+          ? `⚠️ Upload image échoué : ${payload.errors[0].error}`
+          : "⚠️ Upload image échoué.";
+        showAdminToast(msg);
+        console.error("upload-product-images failed:", payload);
+        return;
+      }
+
+      images = (payload.urls || []).filter(Boolean);
+      console.log("upload-product-images: done", { urls: images });
+      if (!images.length) {
+        showAdminToast("⚠️ Upload image échoué : aucune URL retournée.");
+        return;
+      }
+    } catch (e) {
+      console.error("upload-product-images error:", e);
+      showAdminToast("⚠️ Erreur réseau pendant l'upload des images.");
+      return;
+    }
+  }
+
   const productData = {
+
     name,
     category,
     price,
     oldPrice,
     badge,
-    images, // source de vérité (tableau)
-    // compat : conserver aussi un champ image unique pour certaines parties
+    images,
     image: images[0],
     stock,
     description,
     specs,
     reviews_list,
-    rating: 4.5, // Default rating
+    rating: 4.5,
     reviews: reviews_list.length,
     isFavorite: false
   };
@@ -624,14 +667,11 @@ function saveProduct() {
   if (editId) {
     const idx = products.findIndex(p => p.id === editId);
     if (idx > -1) {
-      // Compatibilité : certaines anciennes données ont un champ image seul.
-      // Ici on force images (tableau) + image (1er élément) via productData.
       products[idx] = { ...products[idx], ...productData, id: editId };
     }
     showAdminToast("✅ Produit modifié !");
   } else {
-    const newId = products.length ? Math.max(...products.map(p => p.id)) + 1 : 1;
-    products.push({ ...productData, id: newId });
+    products.push({ ...productData, id: finalId });
     showAdminToast("✅ Produit ajouté !");
   }
 
@@ -641,6 +681,7 @@ function saveProduct() {
   updateSidebarBadges();
   closeProductModal();
 }
+
 
 function deleteProduct(id) {
   const product = products.find(p => p.id === id);

@@ -1,10 +1,12 @@
-# TODO — Remplacement des emojis par Lucide
+# TODO — Optimisation chargement boutique Brazzaphone
 
-- [ ] 1) Mettre à jour `index.html`, `admin.html`, `product.html` : ajout du script Lucide dans `<head>` et `lucide.createIcons()` en fin de `<body>`
-- [ ] 2) Ajouter le CSS global pour `i[data-lucide]` dans les `<head>` de ces pages (ou réutiliser une feuille existante si approprié)
-- [ ] 3) Remplacer toutes les icônes emoji fonctionnelles par `<i data-lucide="...">` selon le mapping fourni
-- [ ] 4) Ne pas toucher au logo Brazzaphone ni aux images produits
-- [ ] 5) Conserver exactement la même disposition et le même texte (ne toucher qu’au symbole)
-- [ ] 6) Vérifier les éléments sur mobile (boutons/labels alignés)
-- [ ] 7) Tester rapidement : chargement des pages, rendu des icônes, fonctionnement des boutons
+- [x] 1) Diagnostiquer: la fonction `/.netlify/functions/save-products` renvoie toute la liste produits depuis `@netlify/blobs` (payload potentiellement énorme si images en base64)
+- [x] 2) Ajouter `Cache-Control` + `s-maxage` sur la réponse **GET** de `netlify/functions/save-products.js`
+- [ ] 3) Déployer et re-tester: cold start vs warm start, et TTFB/transfer (Chrome DevTools → Network)
+- [ ] 4) Migration images: enlever les images base64 du JSON produits
+  - Stocker images en fichier binaire (Netlify Blobs en mode fichier) ou service externe (Cloudinary/imgbb)
+  - Conserver dans le JSON uniquement des URLs d’images
+- [ ] 5) Compresser/redimensionner images côté admin avant upload (max 800-1000px, WebP si possible)
+- [ ] 6) Ajouter/ajuster headers cache côté images (long cache) + éventuellement ETag/If-None-Match JSON
+- [ ] 7) Valider performance: passer ~12s → <2-3s sur la home
 

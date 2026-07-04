@@ -2,7 +2,7 @@
    BRAZZAPHONE – netlify/functions/save-products.js
    Stockage des produits via @netlify/blobs (getStore)
    - POST: sauvegarde la liste complète (tableau)
-   - GET : retourne la liste complète
+   - GET : retourne la liste complète (catalogue)
    ============================================================ */
 
 const { getStore } = require("@netlify/blobs");
@@ -15,6 +15,12 @@ function normalizeProducts(value) {
 }
 
 exports.handler = async (event) => {
+  const corsHeaders = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Headers": "Content-Type",
+    "Access-Control-Allow-Methods": "GET,POST,OPTIONS"
+  };
+
   const store = getStore({
     name: "products",
     siteID: process.env.NETLIFY_SITE_ID,
@@ -24,11 +30,7 @@ exports.handler = async (event) => {
   if (event.httpMethod === "OPTIONS") {
     return {
       statusCode: 204,
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Headers": "Content-Type",
-        "Access-Control-Allow-Methods": "GET,POST,OPTIONS"
-      },
+      headers: corsHeaders,
       body: ""
     };
   }
@@ -44,7 +46,7 @@ exports.handler = async (event) => {
         statusCode: 200,
         headers: {
           "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*"
+          ...corsHeaders
         },
         body: JSON.stringify({ success: true, count: products.length })
       };
@@ -58,7 +60,8 @@ exports.handler = async (event) => {
         statusCode: 200,
         headers: {
           "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*"
+          ...corsHeaders,
+          "Cache-Control": "public, max-age=300, s-maxage=300, stale-while-revalidate=300"
         },
         body: JSON.stringify(products)
       };
@@ -68,7 +71,7 @@ exports.handler = async (event) => {
       statusCode: 405,
       headers: {
         "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*"
+        ...corsHeaders
       },
       body: JSON.stringify({ error: "Method Not Allowed" })
     };
@@ -78,9 +81,10 @@ exports.handler = async (event) => {
       statusCode: 500,
       headers: {
         "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*"
+        ...corsHeaders
       },
       body: JSON.stringify({ error: e.message || String(e) })
     };
   }
 };
+
