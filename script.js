@@ -4,6 +4,8 @@
    ============================================================ */
 
 const WHATSAPP_NUMBER = "+242050797071";
+window.WHATSAPP_NUMBER = WHATSAPP_NUMBER;
+
 
 /* ===== CATALOGUE — chargé depuis products.json ===== */
 window.PRODUCTS = [];
