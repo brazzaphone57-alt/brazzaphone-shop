@@ -3,7 +3,7 @@
    Catalogue · Panier · Commande · WhatsApp
    ============================================================ */
 
-const WHATSAPP_NUMBER = "+242056145113";
+const WHATSAPP_NUMBER = "+242050797071";
 
 /* ===== CATALOGUE — chargé depuis products.json ===== */
 window.PRODUCTS = [];
