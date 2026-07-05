@@ -260,9 +260,10 @@ body { font-family: 'Inter', sans-serif; background: #F5F5F5; color: #1A1A1A; }
    DASHBOARD LAYOUT
 ════════════════════════════════════════ */
 .dashboard {
-  display: flex !important;
+  display: grid !important;
+  grid-template-columns: 260px 1fr;
+  grid-template-rows: auto 1fr;
   min-height: 100vh;
-  flex-direction: row;
 }
 
 /* ── BURGER MOBILE (masqué sur desktop) ── */
@@ -297,6 +298,8 @@ body { font-family: 'Inter', sans-serif; background: #F5F5F5; color: #1A1A1A; }
 
 /* ── SIDEBAR ── */
 .sidebar {
+  grid-column: 1;
+  grid-row: 1 / 3;
   width: 260px;
   min-width: 260px;
   background: #1A1A1A;
@@ -525,6 +528,8 @@ body { font-family: 'Inter', sans-serif; background: #F5F5F5; color: #1A1A1A; }
 
 /* ── MAIN CONTAINER ── */
 .admin-header {
+  grid-column: 2;
+  grid-row: 1;
   position: sticky;
   top: 0;
   background: #fff;
@@ -571,6 +576,8 @@ body { font-family: 'Inter', sans-serif; background: #F5F5F5; color: #1A1A1A; }
 
 /* ── MAIN CONTENT ── */
 .admin-main {
+  grid-column: 2;
+  grid-row: 2;
   flex: 1;
   min-width: 0;
   padding: 24px;
@@ -882,10 +889,17 @@ body { font-family: 'Inter', sans-serif; background: #F5F5F5; color: #1A1A1A; }
 @media (max-width: 768px) {
   .admin-burger { display: flex !important; }
 
-  .dashboard { flex-direction: row !important; }
+  /* Une seule colonne : la sidebar devient un tiroir en position fixe,
+     donc header + main s'empilent naturellement dans la colonne unique */
+  .dashboard {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
 
   /* La sidebar devient un tiroir plein écran, caché par défaut hors champ */
   .sidebar {
+    grid-column: 1;
+    grid-row: 1;
     position: fixed;
     top: 0;
     left: 0;
@@ -901,12 +915,15 @@ body { font-family: 'Inter', sans-serif; background: #F5F5F5; color: #1A1A1A; }
   .sidebar-close { display: block; }
 
   /* Le contenu principal prend toute la largeur, avec espace pour le burger */
-  .admin-main {
-    width: 100%;
-    padding-top: 72px;
-  }
   .admin-header {
+    grid-column: 1;
+    grid-row: 1;
     padding-left: 68px;
+  }
+  .admin-main {
+    grid-column: 1;
+    grid-row: 2;
+    width: 100%;
   }
 
   .form-row { grid-template-columns: 1fr !important; }
