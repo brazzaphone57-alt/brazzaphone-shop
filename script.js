@@ -73,6 +73,17 @@ function renderStars(rating) {
   return stars;
 }
 
+/* ===== FONCTION UTILITAIRE - INDICATEUR DE STOCK ===== */
+function renderStockBadge(stock) {
+  if (stock === 0) {
+    return '<p style="color:#e05500;font-size:.78rem;font-weight:700;margin-top:2px;">⚠️ Épuisé</p>';
+  }
+  if (stock !== undefined && stock !== null && stock <= 3) {
+    return `<p style="color:#ff9800;font-size:.78rem;font-weight:700;margin-top:2px;">🔥 Derniers stocks (${stock})</p>`;
+  }
+  return "";
+}
+
 /* ===== RENDU PRODUITS ===== */
 function renderProducts(list) {
   const grid  = document.getElementById("productGrid");
@@ -120,6 +131,7 @@ function renderProducts(list) {
           ${p.rating ? `<div class="product-rating"><span class="product-stars">${renderStars(p.rating)}</span><span class="product-reviews">${p.rating} (${p.reviews})</span></div>` : ""}
           ${oldPriceHTML}
           <p class="product-price">${fmt(p.price)}</p>
+          ${renderStockBadge(p.stock)}
         </div>
         <span style="display:block;">
           <button class="add-to-cart" onclick="event.preventDefault(); addToCart(${p.id});">

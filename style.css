@@ -611,6 +611,18 @@ a { color: inherit; text-decoration: none; }
 .footer strong { color: #fff; }
 .footer-bottom { border-top: 1px solid rgba(255,255,255,.1); text-align: center; padding: 14px; font-size: .8rem; color: rgba(255,255,255,.4); }
 
+/* ===== LIENS RÉSEAUX SOCIAUX (footer) ===== */
+.footer-social-link {
+  display: inline-block;
+  transition: transform .2s ease, color .2s ease;
+}
+.footer-social-link:hover,
+.footer-social-link:active,
+.footer-social-link:focus-visible {
+  transform: scale(1.12);
+  color: #FF6A00;
+}
+
 /* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
   .header-top-right {
