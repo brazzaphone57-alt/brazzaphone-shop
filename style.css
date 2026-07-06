@@ -149,6 +149,7 @@ a { color: inherit; text-decoration: none; }
   background: transparent;
   color: var(--dark);
   min-width: 0;
+  text-overflow: ellipsis;
 }
 .search-bar input::placeholder {
   color: #999;
@@ -205,19 +206,24 @@ a { color: inherit; text-decoration: none; }
   background: #FF6A00; 
   border: none; 
   color: #fff; 
-  padding: 10px 16px; 
-  border-radius: 20px; 
-  font-size: .95rem; 
+  padding: 8px 14px; 
+  border-radius: 18px; 
+  font-size: .9rem; 
   cursor: pointer; 
   position: relative; 
   transition: all .2s; 
   font-family: 'Inter', sans-serif; 
   font-weight: 600; 
-  height: 44px;
+  height: 38px;
   display: flex;
   align-items: center;
   justify-content: center;
   line-height: 1;
+}
+.cart-btn i[data-lucide] {
+  width: 17px;
+  height: 17px;
+  margin-right: 0;
 }
 .cart-btn:hover { 
   background: #E05500; 
@@ -611,6 +617,13 @@ a { color: inherit; text-decoration: none; }
 .footer strong { color: #fff; }
 .footer-bottom { border-top: 1px solid rgba(255,255,255,.1); text-align: center; padding: 14px; font-size: .8rem; color: rgba(255,255,255,.4); }
 
+/* Regroupe "Paiement accepté" et "Suivez-nous" côte à côte, quelle que soit la largeur d'écran */
+.footer-payment-social {
+  display: flex;
+  gap: 32px;
+  flex-wrap: wrap;
+}
+
 /* ===== LIENS RÉSEAUX SOCIAUX (footer) ===== */
 .footer-social-link {
   display: inline-block;
@@ -689,7 +702,7 @@ a { color: inherit; text-decoration: none; }
   }
 
   .hero {
-    padding: 28px 0;
+    padding: 16px 0;
   }
 
   .hero-inner {
@@ -712,6 +725,12 @@ a { color: inherit; text-decoration: none; }
     flex-wrap: wrap;
     justify-content: center;
     width: 100%;
+    gap: 6px;
+  }
+
+  .hero-badges .badge-card {
+    padding: 6px 12px;
+    font-size: .78rem;
   }
 
   .section-header {
