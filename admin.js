@@ -229,7 +229,10 @@ function renderAdminProducts() {
     : list.map(p => `
     <tr>
       <td><img src="${p.image}" alt="${p.name}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2248%22 height=%2248%22><rect fill=%22%23eee%22 width=%2248%22 height=%2248%22/><text fill=%22%23aaa%22 font-size=%2220%22 x=%2250%25%22 y=%2256%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22>📱</text></svg>'" /></td>
-      <td><strong>${p.name}</strong></td>
+      <td>
+        <strong>${p.name}</strong>
+        ${Number(p.stock) <= 2 ? `<span class="low-stock-badge" title="Stock faible : ${p.stock ?? 0} restant(s)">⚠️ Stock faible (${p.stock ?? 0})</span>` : ""}
+      </td>
       <td><span class="cat-badge cat-${p.category}">${catLabel(p.category)}</span></td>
       <td class="price-cell">${fmt(p.price)}</td>
       <td class="old-price-cell">${p.oldPrice ? fmt(p.oldPrice) : "—"}</td>
@@ -308,12 +311,34 @@ function renderStats() {
 const MAX_PRODUCT_IMAGES = 5;
 
 let selectedImages = []; // dataURL[]
+let selectedImagesMeta = []; // { originalSize, compressedSize } | null, même index que selectedImages
+let dragSrcIndex = null; // index de l'image en cours de glisser-déposer
+let formDirty = false; // true dès qu'un champ du formulaire produit est modifié
+
+// Marque le formulaire comme modifié dès qu'on touche à un champ à l'intérieur du modal
+document.addEventListener("input", e => {
+  if (e.target && e.target.closest && e.target.closest("#productModal")) {
+    formDirty = true;
+  }
+});
+document.addEventListener("change", e => {
+  if (e.target && e.target.closest && e.target.closest("#productModal")) {
+    formDirty = true;
+  }
+});
 
 function getExistingImagesForProduct(p) {
   if (!p) return [];
   if (Array.isArray(p.images) && p.images.length) return p.images;
   if (p.image) return [p.image];
   return [];
+}
+
+function formatFileSize(bytes) {
+  if (!bytes && bytes !== 0) return "";
+  if (bytes < 1024) return `${bytes} o`;
+  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} Ko`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} Mo`;
 }
 
 function updateProductImagesHidden() {
@@ -340,9 +365,15 @@ function renderSelectedImagesPreview() {
     <div class="image-preview-grid">
       ${selectedImages.map((src, idx) => {
         const safeIdx = idx;
+        const meta = selectedImagesMeta[idx];
+        const sizeLabel = meta
+          ? `${formatFileSize(meta.originalSize)} → ${formatFileSize(meta.compressedSize)}`
+          : "";
         return `
-          <div class="preview-item">
+          <div class="preview-item" draggable="true" data-drag-index="${safeIdx}">
+            ${idx === 0 ? `<span class="preview-main-badge">Principale</span>` : ""}
             <img src="${src}" alt="Aperçu ${idx + 1}" />
+            ${sizeLabel ? `<div class="preview-size-label">${sizeLabel}</div>` : ""}
             <button
               type="button"
               class="btn-secondary image-remove remove-btn"
@@ -355,6 +386,7 @@ function renderSelectedImagesPreview() {
         `;
       }).join("")}
     </div>
+    ${selectedImages.length > 1 ? `<div class="preview-reorder-hint">↕️ Glissez une image pour changer l'ordre. La première devient la photo principale.</div>` : ""}
   `;
 
   updateProductImagesHidden();
@@ -362,9 +394,86 @@ function renderSelectedImagesPreview() {
 
 function clearSelectedImages() {
   selectedImages = [];
+  selectedImagesMeta = [];
   renderSelectedImagesPreview();
   const fileInput = document.getElementById("productImages");
   if (fileInput) fileInput.value = "";
+}
+
+/* ===== Glisser-déposer pour réorganiser les images du produit ===== */
+document.addEventListener("dragstart", e => {
+  const item = e.target && e.target.closest && e.target.closest(".preview-item");
+  if (!item) return;
+  dragSrcIndex = parseInt(item.getAttribute("data-drag-index"));
+  e.dataTransfer.effectAllowed = "move";
+  try { e.dataTransfer.setData("text/plain", String(dragSrcIndex)); } catch (err) {}
+});
+
+document.addEventListener("dragover", e => {
+  const item = e.target && e.target.closest && e.target.closest(".preview-item");
+  if (!item) return;
+  e.preventDefault();
+  e.dataTransfer.dropEffect = "move";
+});
+
+document.addEventListener("drop", e => {
+  const item = e.target && e.target.closest && e.target.closest(".preview-item");
+  if (!item) return;
+  e.preventDefault();
+  const targetIndex = parseInt(item.getAttribute("data-drag-index"));
+  if (dragSrcIndex === null || Number.isNaN(targetIndex) || dragSrcIndex === targetIndex) return;
+
+  const [movedImg]  = selectedImages.splice(dragSrcIndex, 1);
+  const [movedMeta] = selectedImagesMeta.splice(dragSrcIndex, 1);
+  selectedImages.splice(targetIndex, 0, movedImg);
+  selectedImagesMeta.splice(targetIndex, 0, movedMeta);
+
+  dragSrcIndex = null;
+  renderSelectedImagesPreview();
+});
+
+/**
+ * Compresse et redimensionne une image avant de la stocker en base64.
+ * Réduit fortement le poids (souvent 3-5 Mo -> 100-300 Ko) sans perte
+ * visible pour un affichage e-commerce.
+ * @param {File} file - Le fichier image original
+ * @param {number} maxWidth - Largeur max en pixels (défaut 1000)
+ * @param {number} quality - Qualité JPEG 0 à 1 (défaut 0.75)
+ * @returns {Promise<string>} - dataURL JPEG compressé
+ */
+function compressImage(file, maxWidth = 1000, quality = 0.75) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onload = (event) => {
+      const img = new Image();
+
+      img.onload = () => {
+        let width = img.width;
+        let height = img.height;
+
+        if (width > maxWidth) {
+          height = Math.round((height * maxWidth) / width);
+          width = maxWidth;
+        }
+
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const compressedDataUrl = canvas.toDataURL("image/jpeg", quality);
+        resolve(compressedDataUrl);
+      };
+
+      img.onerror = () => reject(new Error("Impossible de charger l'image"));
+      img.src = event.target.result;
+    };
+
+    reader.onerror = () => reject(new Error("Impossible de lire le fichier"));
+    reader.readAsDataURL(file);
+  });
 }
 
 (function initImageUpload() {
@@ -388,25 +497,23 @@ function clearSelectedImages() {
       return;
     }
 
-    const toDataURL = (file) => new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(String(reader.result || ""));
-      reader.onerror = () => reject(new Error("FileReader error"));
-      reader.readAsDataURL(file);
-    });
-
     try {
+      showAdminToast("⏳ Compression des images...");
       for (const file of filesToRead) {
         if (file.size > 10 * 1024 * 1024) {
           showAdminToast("⚠️ Image trop lourde (max 10MB).");
           fileInput.value = "";
           continue;
         }
-        const dataUrl = await toDataURL(file);
-        selectedImages.push(dataUrl);
+        const compressedDataUrl = await compressImage(file, 1000, 0.75);
+        // Poids approximatif du base64 compressé (en octets)
+        const compressedSize = Math.round((compressedDataUrl.length * 3) / 4);
+        selectedImages.push(compressedDataUrl);
+        selectedImagesMeta.push({ originalSize: file.size, compressedSize });
       }
 
       renderSelectedImagesPreview();
+      showAdminToast("✅ Images compressées et prêtes !");
       // Reset input pour permettre re-sélection identique
       fileInput.value = "";
     } catch (e) {
@@ -435,6 +542,7 @@ function openProductModal(id = null) {
 
     // Images : support images[] (nouveau) + fallback image (ancien)
     selectedImages = getExistingImagesForProduct(p);
+    selectedImagesMeta = selectedImages.map(() => null); // poids inconnu pour les images déjà enregistrées
     document.getElementById("pImage").value = selectedImages[0] || "";
     renderSelectedImagesPreview();
 
@@ -459,6 +567,11 @@ function openProductModal(id = null) {
   }
 
   modal.classList.add("open");
+
+  // Le formulaire vient d'être (ré)initialisé : on considère qu'il n'y a
+  // pas encore de modification en attente. On attend la fin de la pile
+  // d'exécution pour éviter que le remplissage ci-dessus ne déclenche le flag.
+  setTimeout(() => { formDirty = false; }, 0);
 }
 
 function renderSpecRows(specs = {}) {
@@ -537,7 +650,12 @@ function escapeAttr(str = "") {
     .replaceAll('"', "&quot;");
 }
 
-function closeProductModal() {
+function closeProductModal(force = false) {
+  if (!force && formDirty) {
+    const ok = confirm("⚠️ Vous avez des modifications non enregistrées. Fermer quand même ?");
+    if (!ok) return;
+  }
+  formDirty = false;
   document.getElementById("productModal").classList.remove("open");
 }
 
@@ -551,6 +669,7 @@ document.addEventListener("click", e => {
     const idx = parseInt(idxRaw);
     if (!Number.isNaN(idx)) {
       selectedImages = selectedImages.filter((_, i) => i !== idx);
+      selectedImagesMeta = selectedImagesMeta.filter((_, i) => i !== idx);
       renderSelectedImagesPreview();
       const fileInput = document.getElementById("productImages");
       if (fileInput) fileInput.value = "";
@@ -604,112 +723,128 @@ async function saveProduct() {
     return;
   }
 
-  // Récupérer les spécifications
-  const specs = {};
-  document.querySelectorAll(".spec-row").forEach(row => {
-    const key = row.querySelector(".spec-key")?.value.trim();
-    const value = row.querySelector(".spec-value")?.value.trim();
-    if (key && value) specs[key] = value;
-  });
-
-  // Récupérer les avis
-  const reviews_list = [];
-  document.querySelectorAll(".review-row").forEach(row => {
-    const author = row.querySelector(".review-author")?.value.trim();
-    const rating = parseInt(row.querySelector(".review-rating")?.value || 5);
-    const text = row.querySelector(".review-text")?.value.trim();
-    if (author && text) {
-      reviews_list.push({ author, rating, text });
-    }
-  });
-
-  // Déterminer un id final AVANT upload (pour nommage des images)
-  const finalId = editId || (products.length ? Math.max(...products.map(p => p.id)) + 1 : 1);
-
-  // Upload images si ce sont des dataURLs
-  let images = selected;
-  // Si on a au moins 1 image mais qu'aucun dataURL n'est présent, on ne fait pas d'upload.
-  // (Dans ce cas, `images` doit déjà être une vraie URL blob, sinon l'affichage sera invalide.)
-  const needsUpload = Array.isArray(images) && images.some(x => typeof x === 'string' && x.startsWith('data:'));
-
-  // Sécurité supplémentaire : si on a des références de type "<digits>_<digits>" qui ont fuit,
-  // on force un fallback vers un vrai placeholder pour éviter de générer /.netlify/blobs/product-images/<id>.
-  // (On protège aussi contre les chaînes "images/placeholder.jpg" si vide.)
-  const isBadKeyLike = (s) => typeof s === 'string' && /^\d+_\d+$/.test(s.trim());
-  if (Array.isArray(images)) {
-    images = images.map(img => (isBadKeyLike(img) ? "images/placeholder.jpg" : img));
+  // Désactiver le bouton Enregistrer pour éviter les doubles clics / doublons
+  // pendant une sauvegarde qui peut prendre du temps (upload images + réseau lent).
+  const saveBtn = document.querySelector('[onclick="saveProduct()"]');
+  const saveBtnOriginalText = saveBtn ? saveBtn.textContent : null;
+  if (saveBtn) {
+    saveBtn.disabled = true;
+    saveBtn.textContent = "⏳ Enregistrement...";
   }
 
+  try {
+    // Récupérer les spécifications
+    const specs = {};
+    document.querySelectorAll(".spec-row").forEach(row => {
+      const key = row.querySelector(".spec-key")?.value.trim();
+      const value = row.querySelector(".spec-value")?.value.trim();
+      if (key && value) specs[key] = value;
+    });
 
-  if (needsUpload) {
-    // Debug (visible dans console) + toast pour confirmer que l'appel part.
-    console.log("upload-product-images: starting", { finalId, count: images.length });
-    showAdminToast("⏫ Upload des images...");
+    // Récupérer les avis
+    const reviews_list = [];
+    document.querySelectorAll(".review-row").forEach(row => {
+      const author = row.querySelector(".review-author")?.value.trim();
+      const rating = parseInt(row.querySelector(".review-rating")?.value || 5);
+      const text = row.querySelector(".review-text")?.value.trim();
+      if (author && text) {
+        reviews_list.push({ author, rating, text });
+      }
+    });
 
-    try {
-      const res = await fetch("/.netlify/functions/upload-product-images", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productId: finalId, images })
-      });
+    // Déterminer un id final AVANT upload (pour nommage des images)
+    const finalId = editId || (products.length ? Math.max(...products.map(p => p.id)) + 1 : 1);
 
-      const payload = await res.json().catch(() => null);
-      if (!res.ok || !payload || payload.success !== true) {
-        const msg = payload && payload.errors && payload.errors.length
-          ? `⚠️ Upload image échoué : ${payload.errors[0].error}`
-          : "⚠️ Upload image échoué.";
-        showAdminToast(msg);
-        console.error("upload-product-images failed:", payload);
+    // Upload images si ce sont des dataURLs
+    let images = selected;
+    // Si on a au moins 1 image mais qu'aucun dataURL n'est présent, on ne fait pas d'upload.
+    // (Dans ce cas, `images` doit déjà être une vraie URL blob, sinon l'affichage sera invalide.)
+    const needsUpload = Array.isArray(images) && images.some(x => typeof x === 'string' && x.startsWith('data:'));
+
+    // Sécurité supplémentaire : si on a des références de type "<digits>_<digits>" qui ont fuit,
+    // on force un fallback vers un vrai placeholder pour éviter de générer /.netlify/blobs/product-images/<id>.
+    // (On protège aussi contre les chaînes "images/placeholder.jpg" si vide.)
+    const isBadKeyLike = (s) => typeof s === 'string' && /^\d+_\d+$/.test(s.trim());
+    if (Array.isArray(images)) {
+      images = images.map(img => (isBadKeyLike(img) ? "images/placeholder.jpg" : img));
+    }
+
+
+    if (needsUpload) {
+      // Debug (visible dans console) + toast pour confirmer que l'appel part.
+      console.log("upload-product-images: starting", { finalId, count: images.length });
+      showAdminToast("⏫ Upload des images...");
+
+      try {
+        const res = await fetch("/.netlify/functions/upload-product-images", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ productId: finalId, images })
+        });
+
+        const payload = await res.json().catch(() => null);
+        if (!res.ok || !payload || payload.success !== true) {
+          const msg = payload && payload.errors && payload.errors.length
+            ? `⚠️ Upload image échoué : ${payload.errors[0].error}`
+            : "⚠️ Upload image échoué.";
+          showAdminToast(msg);
+          console.error("upload-product-images failed:", payload);
+          return;
+        }
+
+        images = (payload.urls || []).filter(Boolean);
+        console.log("upload-product-images: done", { urls: images });
+        if (!images.length) {
+          showAdminToast("⚠️ Upload image échoué : aucune URL retournée.");
+          return;
+        }
+      } catch (e) {
+        console.error("upload-product-images error:", e);
+        showAdminToast("⚠️ Erreur réseau pendant l'upload des images.");
         return;
       }
+    }
 
-      images = (payload.urls || []).filter(Boolean);
-      console.log("upload-product-images: done", { urls: images });
-      if (!images.length) {
-        showAdminToast("⚠️ Upload image échoué : aucune URL retournée.");
-        return;
+    const productData = {
+
+      name,
+      category,
+      price,
+      oldPrice,
+      badge,
+      images,
+      image: images[0],
+      stock,
+      description,
+      specs,
+      reviews_list,
+      rating: 4.5,
+      reviews: reviews_list.length,
+      isFavorite: false
+    };
+
+    if (editId) {
+      const idx = products.findIndex(p => p.id === editId);
+      if (idx > -1) {
+        products[idx] = { ...products[idx], ...productData, id: editId };
       }
-    } catch (e) {
-      console.error("upload-product-images error:", e);
-      showAdminToast("⚠️ Erreur réseau pendant l'upload des images.");
-      return;
+      showAdminToast("✅ Produit modifié !");
+    } else {
+      products.push({ ...productData, id: finalId });
+      showAdminToast("✅ Produit ajouté !");
+    }
+
+    saveData();
+    renderAdminProducts();
+    renderStats();
+    updateSidebarBadges();
+    closeProductModal(true); // fermeture forcée : les données viennent d'être enregistrées
+  } finally {
+    if (saveBtn) {
+      saveBtn.disabled = false;
+      saveBtn.textContent = saveBtnOriginalText;
     }
   }
-
-  const productData = {
-
-    name,
-    category,
-    price,
-    oldPrice,
-    badge,
-    images,
-    image: images[0],
-    stock,
-    description,
-    specs,
-    reviews_list,
-    rating: 4.5,
-    reviews: reviews_list.length,
-    isFavorite: false
-  };
-
-  if (editId) {
-    const idx = products.findIndex(p => p.id === editId);
-    if (idx > -1) {
-      products[idx] = { ...products[idx], ...productData, id: editId };
-    }
-    showAdminToast("✅ Produit modifié !");
-  } else {
-    products.push({ ...productData, id: finalId });
-    showAdminToast("✅ Produit ajouté !");
-  }
-
-  saveData();
-  renderAdminProducts();
-  renderStats();
-  updateSidebarBadges();
-  closeProductModal();
 }
 
 
