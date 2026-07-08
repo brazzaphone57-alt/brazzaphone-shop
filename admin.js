@@ -8,14 +8,14 @@ const ADMIN_PASS = "brazzaphone2025";
 let sessionTimeout = null;
 const SESSION_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes
 
-function doLogin() {
+async function doLogin() {
   const u = document.getElementById("loginUser").value.trim();
   const p = document.getElementById("loginPass").value.trim();
   if (u === ADMIN_USER && p === ADMIN_PASS) {
     document.getElementById("loginScreen").style.display = "none";
     document.getElementById("dashboard").style.display = "flex";
     document.getElementById("loginError").textContent = "";
-    loadData();
+    await loadData();
     renderAdminProducts();
     renderStats();
     renderMiniStats();
@@ -83,9 +83,29 @@ const DEFAULT_PRODUCTS = [];
 
 let products = [];
 
-function loadData() {
-  const saved = localStorage.getItem("bpAdminProducts");
-  products = saved ? JSON.parse(saved) : [...DEFAULT_PRODUCTS];
+/* ===== CHARGEMENT — lit depuis le serveur (source commune), fallback localStorage ===== */
+async function loadData() {
+  try {
+    const res = await fetch("/.netlify/functions/save-products", {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+      cache: "no-store"
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data)) {
+        products = data;
+        localStorage.setItem("bpAdminProducts", JSON.stringify(products));
+        return;
+      }
+    }
+    throw new Error("Réponse serveur invalide");
+  } catch (e) {
+    console.warn("Impossible de charger depuis le serveur, fallback localStorage :", e);
+    const saved = localStorage.getItem("bpAdminProducts");
+    products = saved ? JSON.parse(saved) : [...DEFAULT_PRODUCTS];
+  }
 }
 
 /* ===== SAUVEGARDE — écrit dans products.json via Netlify Function ===== */
