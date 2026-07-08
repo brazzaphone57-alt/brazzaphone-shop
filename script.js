@@ -45,6 +45,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     } catch (e2) {}
   }
 
+  // ✅ Tri stable garanti dès le premier chargement (id décroissant = plus récent en premier)
+  window.PRODUCTS.sort((a, b) => b.id - a.id);
 
   renderProducts(window.PRODUCTS);
   updateCartUI();
@@ -214,21 +216,17 @@ function applyFilters() {
 
 /* ===== RÉINITIALISER LES FILTRES ===== */
 function resetFilters() {
-  // Réinitialiser les inputs
   document.getElementById("priceMin").value = "";
   document.getElementById("priceMax").value = "";
   document.getElementById("sortBy").value = "recent";
   document.getElementById("searchInput").value = "";
-  
-  // Réinitialiser l'état
+
   currentSearch = "";
   currentFilter = "all";
-  
-  // Réinitialiser les boutons de catégorie
+
   document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
   document.querySelectorAll(".nav-btn")[0].classList.add("active");
-  
-  // Appliquer les filtres
+
   applyFilters();
 }
 

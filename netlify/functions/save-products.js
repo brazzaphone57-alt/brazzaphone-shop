@@ -61,7 +61,7 @@ exports.handler = async (event) => {
         headers: {
           "Content-Type": "application/json",
           ...corsHeaders,
-          "Cache-Control": "public, max-age=300, s-maxage=300, stale-while-revalidate=300"
+          "Cache-Control": "no-store"
         },
         body: JSON.stringify(products)
       };
@@ -87,4 +87,3 @@ exports.handler = async (event) => {
     };
   }
 };
-

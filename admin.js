@@ -432,10 +432,45 @@ document.addEventListener("drop", e => {
   renderSelectedImagesPreview();
 });
 
+/* ===== WATERMARK LOGO =====
+   Superpose le logo Brazzaphone sur chaque image produit avant compression.
+   Tout se passe côté navigateur (Canvas) : aucun appel serveur, donc aucun
+   crédit Netlify consommé. */
+let _logoImageCache = null;
+
+function loadLogoImage() {
+  if (_logoImageCache) return Promise.resolve(_logoImageCache);
+  return new Promise((resolve, reject) => {
+    const logo = new Image();
+    logo.onload = () => {
+      _logoImageCache = logo;
+      resolve(logo);
+    };
+    logo.onerror = () => reject(new Error("Logo introuvable"));
+    logo.src = "logo-brazzaphone.png.jpeg";
+  });
+}
+
+function drawWatermark(ctx, canvasWidth, canvasHeight, logo) {
+  // Le logo occupe ~15% de la largeur de l'image, coin bas-droit, avec une marge
+  const logoWidth = canvasWidth * 0.15;
+  const logoHeight = logoWidth * (logo.height / logo.width);
+  const margin = canvasWidth * 0.03;
+
+  const x = canvasWidth - logoWidth - margin;
+  const y = canvasHeight - logoHeight - margin;
+
+  ctx.save();
+  ctx.globalAlpha = 0.75; // légère transparence pour rester discret
+  ctx.drawImage(logo, x, y, logoWidth, logoHeight);
+  ctx.restore();
+}
+
 /**
  * Compresse et redimensionne une image avant de la stocker en base64.
  * Réduit fortement le poids (souvent 3-5 Mo -> 100-300 Ko) sans perte
- * visible pour un affichage e-commerce.
+ * visible pour un affichage e-commerce. Ajoute aussi le logo Brazzaphone
+ * en filigrane discret dans le coin bas-droit.
  * @param {File} file - Le fichier image original
  * @param {number} maxWidth - Largeur max en pixels (défaut 1000)
  * @param {number} quality - Qualité JPEG 0 à 1 (défaut 0.75)
@@ -448,7 +483,7 @@ function compressImage(file, maxWidth = 1000, quality = 0.75) {
     reader.onload = (event) => {
       const img = new Image();
 
-      img.onload = () => {
+      img.onload = async () => {
         let width = img.width;
         let height = img.height;
 
@@ -462,6 +497,14 @@ function compressImage(file, maxWidth = 1000, quality = 0.75) {
         canvas.height = height;
         const ctx = canvas.getContext("2d");
         ctx.drawImage(img, 0, 0, width, height);
+
+        try {
+          const logo = await loadLogoImage();
+          drawWatermark(ctx, width, height, logo);
+        } catch (e) {
+          console.warn("Watermark non appliqué :", e.message);
+          // On continue sans logo plutôt que de bloquer l'ajout du produit
+        }
 
         const compressedDataUrl = canvas.toDataURL("image/jpeg", quality);
         resolve(compressedDataUrl);
