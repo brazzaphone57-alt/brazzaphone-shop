@@ -16,6 +16,7 @@ async function doLogin() {
     document.getElementById("dashboard").style.display = "flex";
     document.getElementById("loginError").textContent = "";
     await loadData();
+    await loadViews();
     renderAdminProducts();
     renderStats();
     renderMiniStats();
@@ -82,6 +83,30 @@ document.addEventListener("click", () => {
 const DEFAULT_PRODUCTS = [];
 
 let products = [];
+
+/* ===== VUES PRODUITS ===== */
+let productViews = {}; // { "1": 12, "2": 5, ... }
+
+async function loadViews() {
+  try {
+    const res = await fetch("/.netlify/functions/track-view", {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+      cache: "no-store"
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data && typeof data === "object") {
+        productViews = data;
+        return;
+      }
+    }
+    throw new Error("Réponse serveur invalide");
+  } catch (e) {
+    console.warn("Impossible de charger les vues :", e);
+    productViews = {};
+  }
+}
 
 /* ===== CHARGEMENT — lit depuis le serveur (source commune), fallback localStorage ===== */
 async function loadData() {
@@ -245,7 +270,7 @@ function renderAdminProducts() {
   if (!tbody) return;
 
   tbody.innerHTML = list.length === 0
-    ? `<tr><td colspan="7" style="text-align:center;padding:32px;color:#aaa;">Aucun produit trouvé</td></tr>`
+    ? `<tr><td colspan="8" style="text-align:center;padding:32px;color:#aaa;">Aucun produit trouvé</td></tr>`
     : list.map(p => `
     <tr>
       <td><img src="${p.image}" alt="${p.name}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2248%22 height=%2248%22><rect fill=%22%23eee%22 width=%2248%22 height=%2248%22/><text fill=%22%23aaa%22 font-size=%2220%22 x=%2250%25%22 y=%2256%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22>📱</text></svg>'" /></td>
@@ -257,6 +282,7 @@ function renderAdminProducts() {
       <td class="price-cell">${fmt(p.price)}</td>
       <td class="old-price-cell">${p.oldPrice ? fmt(p.oldPrice) : "—"}</td>
       <td>${p.badge || "—"}</td>
+      <td style="text-align:center;">👁️ ${productViews[p.id] || 0}</td>
       <td>
         <div class="action-btns">
           <button class="edit-btn" onclick="openProductModal(${p.id})">✏️ Modifier</button>
