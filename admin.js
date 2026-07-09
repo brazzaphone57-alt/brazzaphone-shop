@@ -282,6 +282,7 @@ function renderAdminProducts() {
       <td class="price-cell">${fmt(p.price)}</td>
       <td class="old-price-cell">${p.oldPrice ? fmt(p.oldPrice) : "—"}</td>
       <td>${p.badge || "—"}</td>
+      <td style="text-align:center;">${p.stock ?? 0}</td>
       <td style="text-align:center;">👁️ ${productViews[p.id] || 0}</td>
       <td>
         <div class="action-btns">
