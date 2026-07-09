@@ -467,7 +467,7 @@ function loadLogoImage() {
       resolve(logo);
     };
     logo.onerror = () => reject(new Error("Logo introuvable"));
-    logo.src = "logo-brazzaphone.png.jpeg";
+    logo.src = "logo-brazzaphone-transparent.png";
   });
 }
 
