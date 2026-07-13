@@ -40,6 +40,33 @@ exports.handler = async (event) => {
       const body = event.body ? JSON.parse(event.body) : null;
       const products = normalizeProducts(body);
 
+      // SÉCURITÉ : refuser d'écraser un catalogue existant avec une liste vide,
+      // sauf confirmation explicite (?force=true). Évite la perte accidentelle
+      // de tous les produits suite à un bug ou une déconnexion côté admin.
+      if (products.length === 0) {
+        const qs = event.queryStringParameters || {};
+        const force = qs.force === "true";
+
+        if (!force) {
+          const existingRaw = await store.get(PRODUCTS_KEY);
+          const existing = existingRaw ? normalizeProducts(JSON.parse(existingRaw)) : [];
+
+          if (existing.length > 0) {
+            return {
+              statusCode: 409,
+              headers: {
+                "Content-Type": "application/json",
+                ...corsHeaders
+              },
+              body: JSON.stringify({
+                error: "Refus : tentative d'écraser un catalogue non-vide avec une liste vide.",
+                existingCount: existing.length
+              })
+            };
+          }
+        }
+      }
+
       await store.set(PRODUCTS_KEY, JSON.stringify(products));
 
       return {

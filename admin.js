@@ -16,6 +16,7 @@ async function doLogin() {
     document.getElementById("dashboard").style.display = "flex";
     document.getElementById("loginError").textContent = "";
     await loadData();
+    await loadViews();
     renderAdminProducts();
     renderStats();
     renderMiniStats();
@@ -83,7 +84,35 @@ const DEFAULT_PRODUCTS = [];
 
 let products = [];
 
-/* ===== CHARGEMENT — lit depuis le serveur (source commune), fallback localStorage ===== */
+/* ===== VUES PRODUITS ===== */
+let productViews = {}; // { "1": 12, "2": 5, ... }
+
+async function loadViews() {
+  try {
+    const res = await fetch("/.netlify/functions/track-view", {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+      cache: "no-store"
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data && typeof data === "object") {
+        productViews = data;
+        return;
+      }
+    }
+    throw new Error("Réponse serveur invalide");
+  } catch (e) {
+    console.warn("Impossible de charger les vues :", e);
+    productViews = {};
+  }
+}
+
+/* ===== CHARGEMENT — lit depuis le serveur (source commune), fallback localStorage =====
+   SÉCURITÉ : on ne remplace JAMAIS silencieusement par une liste vide.
+   `dataLoadedSuccessfully` sert de garde-fou pour saveData(). */
+let dataLoadedSuccessfully = false;
+
 async function loadData() {
   try {
     const res = await fetch("/.netlify/functions/save-products", {
@@ -97,19 +126,36 @@ async function loadData() {
       if (Array.isArray(data)) {
         products = data;
         localStorage.setItem("bpAdminProducts", JSON.stringify(products));
+        dataLoadedSuccessfully = true;
         return;
       }
     }
     throw new Error("Réponse serveur invalide");
   } catch (e) {
     console.warn("Impossible de charger depuis le serveur, fallback localStorage :", e);
+    dataLoadedSuccessfully = false;
+
     const saved = localStorage.getItem("bpAdminProducts");
-    products = saved ? JSON.parse(saved) : [...DEFAULT_PRODUCTS];
+    if (saved) {
+      products = JSON.parse(saved);
+      showAdminToast("⚠️ Catalogue chargé depuis la sauvegarde locale (pas le serveur). Vérifie ta connexion avant de modifier quoi que ce soit.");
+    } else {
+      products = [...DEFAULT_PRODUCTS];
+      showAdminToast("🚫 Échec du chargement du catalogue. NE MODIFIE RIEN — recharge la page ou vérifie ta connexion internet.");
+    }
   }
 }
 
-/* ===== SAUVEGARDE — écrit dans products.json via Netlify Function ===== */
+/* ===== SAUVEGARDE — écrit dans products.json via Netlify Function =====
+   SÉCURITÉ : on refuse d'envoyer une liste vide si le chargement initial
+   n'a pas réussi depuis le serveur, pour éviter d'écraser le vrai catalogue. */
 async function saveData() {
+  if (!dataLoadedSuccessfully && products.length === 0) {
+    showAdminToast("🚫 Sauvegarde bloquée : le catalogue n'a pas été chargé correctement depuis le serveur. Recharge la page avant de continuer, sinon tu risques d'écraser tes produits.");
+    console.error("saveData() bloqué : dataLoadedSuccessfully=false et products vide.");
+    return;
+  }
+
   // 1. Backup local immédiat
   localStorage.setItem("bpAdminProducts", JSON.stringify(products));
 
@@ -122,7 +168,14 @@ async function saveData() {
     });
 
     if (res.status === 200) {
+      dataLoadedSuccessfully = true; // le serveur a maintenant cette version confirmée
       showAdminToast("✅ Boutique mise à jour automatiquement !");
+      return;
+    }
+
+    if (res.status === 409) {
+      const err = await res.json().catch(() => ({}));
+      showAdminToast(`🚫 Sauvegarde refusée par le serveur : tu essaies d'écraser ${err.existingCount || "des"} produits existants avec une liste vide.`);
       return;
     }
 
@@ -245,7 +298,7 @@ function renderAdminProducts() {
   if (!tbody) return;
 
   tbody.innerHTML = list.length === 0
-    ? `<tr><td colspan="7" style="text-align:center;padding:32px;color:#aaa;">Aucun produit trouvé</td></tr>`
+    ? `<tr><td colspan="8" style="text-align:center;padding:32px;color:#aaa;">Aucun produit trouvé</td></tr>`
     : list.map(p => `
     <tr>
       <td><img src="${p.image}" alt="${p.name}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2248%22 height=%2248%22><rect fill=%22%23eee%22 width=%2248%22 height=%2248%22/><text fill=%22%23aaa%22 font-size=%2220%22 x=%2250%25%22 y=%2256%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22>📱</text></svg>'" /></td>
@@ -257,6 +310,8 @@ function renderAdminProducts() {
       <td class="price-cell">${fmt(p.price)}</td>
       <td class="old-price-cell">${p.oldPrice ? fmt(p.oldPrice) : "—"}</td>
       <td>${p.badge || "—"}</td>
+      <td style="text-align:center;">${p.stock ?? 0}</td>
+      <td style="text-align:center;">👁️ ${productViews[p.id] || 0}</td>
       <td>
         <div class="action-btns">
           <button class="edit-btn" onclick="openProductModal(${p.id})">✏️ Modifier</button>

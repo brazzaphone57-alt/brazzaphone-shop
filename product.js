@@ -1,4 +1,4 @@
-  /* Product details page logic */
+/* Product details page logic */
 
 (function () {
   const params = new URLSearchParams(window.location.search);
@@ -337,6 +337,29 @@
     return stars;
   }
 
+  // ===== TRACKING DES VUES PRODUIT =====
+  function trackProductView(product) {
+    // 1) Compteur personnalisé (Netlify Blobs)
+    fetch('/.netlify/functions/track-view', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: product.id })
+    }).catch(e => console.warn('Erreur tracking vue :', e));
+
+    // 2) Événement GA4 via GTM
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({
+      event: 'view_item',
+      ecommerce: {
+        items: [{
+          item_id: product.id,
+          item_name: product.name,
+          price: product.price
+        }]
+      }
+    });
+  }
+
   function init() {
     // Solution robuste : charger le catalogue directement sur la page produit.
     const loadAndRender = async () => {
@@ -389,6 +412,9 @@
       renderSimilar(sims);
 
       if (typeof window.updateCartUI === 'function') window.updateCartUI();
+
+      // Enregistrer la vue une fois le produit confirmé trouvé
+      trackProductView(currentProduct);
     };
 
     loadAndRender();
@@ -402,4 +428,3 @@
     init();
   }
 })();
-
