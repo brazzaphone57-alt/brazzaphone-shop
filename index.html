@@ -67,13 +67,13 @@
         <div class="nav-inner" id="navInner">
           <button class="nav-btn active" onclick="filterCategory('all')"><i data-lucide="home" aria-hidden="true"></i> Tout</button>
 
+          <button class="nav-btn nav-btn-featured" onclick="filterCategory('accessoire')"><i data-lucide="headphones" aria-hidden="true"></i> Accessoires</button>
+
+          <button class="nav-btn" onclick="filterCategory('promo')"><i data-lucide="flame" aria-hidden="true"></i> Promos</button>
+
           <button class="nav-btn" onclick="filterCategory('neuf')"><i data-lucide="smartphone" aria-hidden="true"></i> Neufs</button>
 
           <button class="nav-btn" onclick="filterCategory('reconditionne')"><i data-lucide="refresh-cw" aria-hidden="true"></i> Reconditionnés</button>
-
-          <button class="nav-btn" onclick="filterCategory('accessoire')"><i data-lucide="headphones" aria-hidden="true"></i> Accessoires</button>
-
-          <button class="nav-btn" onclick="filterCategory('promo')"><i data-lucide="flame" aria-hidden="true"></i> Promos</button>
 
         </div>
       </div>
@@ -87,8 +87,9 @@
         <p class="hero-eyebrow"><i data-lucide="flame" aria-hidden="true"></i> Offres exclusives à Brazzaville</p>
 
         <h1>Téléphones & Accessoires<br /><span class="hero-accent">au meilleur prix</span></h1>
+        <p class="hero-sub">🎧 Nouveau : large choix d'accessoires en stock — coques, chargeurs, écouteurs et plus</p>
         <p class="hero-sub">Paiement Airtel Money · MTN Money · Livraison cash</p>
-        <button class="hero-cta" onclick="filterCategory('all')">Voir les produits</button>
+        <button class="hero-cta" onclick="filterCategory('accessoire')">Voir les accessoires</button>
       </div>
       <div class="hero-badges">
         <div class="badge-card"><i data-lucide="package" aria-hidden="true"></i> Produits garantis</div>
@@ -103,6 +104,12 @@
   <!-- ========== PRODUITS ========== -->
   <main class="main">
     <div class="container">
+      <div class="featured-banner" onclick="filterCategory('accessoire')" role="button" tabindex="0">
+        <span class="featured-banner-icon">🎧</span>
+        <span class="featured-banner-text"><strong>En vedette cette semaine :</strong> nos accessoires — protection, chargeurs, écouteurs et plus</span>
+        <span class="featured-banner-cta">Découvrir <i data-lucide="arrow-right" aria-hidden="true"></i></span>
+      </div>
+
       <div class="section-header">
         <h2 class="section-title">Nos Produits</h2>
         <span class="product-count" id="productCount"></span>

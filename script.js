@@ -45,8 +45,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     } catch (e2) {}
   }
 
-  // ✅ Tri stable garanti dès le premier chargement (id décroissant = plus récent en premier)
-  window.PRODUCTS.sort((a, b) => b.id - a.id);
+  // ✅ Phase accessoires : tri stable, accessoires en premier, puis plus récent
+  sortFeatured(window.PRODUCTS);
 
   renderProducts(window.PRODUCTS);
   updateCartUI();
@@ -65,6 +65,22 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 });
+
+/* ===== TRI "PHASE ACCESSOIRES" =====
+   Pendant cette phase de lancement, les accessoires sont mis en avant
+   en premier dans la liste. À l'intérieur de chaque groupe, on garde
+   le tri "plus récent" (id décroissant). Pour repasser à un tri neutre
+   plus tard, remplacer categoryPriority par une fonction qui renvoie 0. */
+function categoryPriority(p) {
+  return p.category === "accessoire" ? 0 : 1;
+}
+function sortFeatured(list) {
+  return list.sort((a, b) => {
+    const catDiff = categoryPriority(a) - categoryPriority(b);
+    if (catDiff !== 0) return catDiff;
+    return b.id - a.id;
+  });
+}
 
 /* ===== FONCTION UTILITAIRE - ÉTOILES ===== */
 function renderStars(rating) {
@@ -207,8 +223,8 @@ function applyFilters() {
   } else if (sortBy === "popular") {
     list.sort((a, b) => (b.reviews || 0) - (a.reviews || 0));
   } else {
-    // "recent" — garder l'ordre original
-    list = list.sort((a, b) => b.id - a.id);
+    // "recent" — phase accessoires : accessoires en premier, puis plus récent
+    list = sortFeatured(list);
   }
 
   renderProducts(list);

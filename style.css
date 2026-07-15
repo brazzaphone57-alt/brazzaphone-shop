@@ -291,6 +291,34 @@ a { color: inherit; text-decoration: none; }
   background: transparent; 
 }
 
+/* Mise en avant temporaire — phase de lancement accessoires */
+.nav-btn-featured {
+  color: #FF6A00;
+  font-weight: 700;
+}
+
+/* ===== BANDEAU EN VEDETTE (avant la grille produits) ===== */
+.featured-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: linear-gradient(135deg, #2d1a00 0%, #FF6A00 140%);
+  color: #fff;
+  padding: 14px 20px;
+  border-radius: 10px;
+  margin: 18px 0 24px;
+  cursor: pointer;
+  transition: transform .15s, box-shadow .15s;
+}
+.featured-banner:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(255,106,0,.25); }
+.featured-banner-icon { font-size: 1.4rem; }
+.featured-banner-text { flex: 1; font-size: .92rem; }
+.featured-banner-cta { font-weight: 700; font-size: .88rem; white-space: nowrap; display: flex; align-items: center; gap: 4px; }
+@media (max-width: 640px) {
+  .featured-banner { flex-wrap: wrap; }
+  .featured-banner-text { flex-basis: 100%; }
+}
+
 
 /* ===== HERO — fond sombre avec accent orange ===== */
 .hero { background: linear-gradient(135deg, #1A1A1A 0%, #2d1a00 60%, #FF6A00 100%); padding: 40px 0; }
